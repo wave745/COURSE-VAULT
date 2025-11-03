@@ -13,10 +13,12 @@ export async function migrate() {
     await db.execute(sql`
       CREATE TABLE IF NOT EXISTS users (
         id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
-        username TEXT NOT NULL UNIQUE,
-        password TEXT NOT NULL,
-        email TEXT,
+        vault_id TEXT NOT NULL UNIQUE,
+        email TEXT NOT NULL UNIQUE,
         display_name TEXT,
+        email_verified BOOLEAN NOT NULL DEFAULT FALSE,
+        verification_token TEXT,
+        verification_expiry TIMESTAMP,
         reputation INTEGER NOT NULL DEFAULT 0,
         created_at TIMESTAMP NOT NULL DEFAULT NOW()
       );
