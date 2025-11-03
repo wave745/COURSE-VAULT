@@ -12,7 +12,7 @@ const colleges = [
   { id: "BMS", name: "College of Business and Management Studies", slug: "business-management", courseCount: 98, fileCount: 612, description: "Business, economics, and management disciplines" },
   { id: "ENG", name: "College of Engineering", slug: "engineering", courseCount: 221, fileCount: 1483, description: "10 departments including Chemical, Civil, Mechanical, Petroleum Engineering" },
   { id: "HSC", name: "College of Health Sciences", slug: "health-sciences", courseCount: 275, fileCount: 2191, description: "14 departments including Medicine, Surgery, Nursing, Radiology" },
-  { id: "JUPEB", name: "JUPEB", slug: "jupeb", courseCount: 24, fileCount: 87, description: "Joint Universities Preliminary Examinations Board program" },
+  { id: "JUPEB", name: "JUPEB", slug: "jupeb", courseCount: 89, fileCount: 422, description: "10 subject combinations for pre-degree studies" },
   { id: "LAW", name: "College of Law", slug: "law", courseCount: 45, fileCount: 289, description: "Legal practice, jurisprudence, and statutory law" },
   { id: "NAS", name: "College of Natural and Applied Science", slug: "natural-applied-science", courseCount: 167, fileCount: 1043, description: "Pure and applied sciences, mathematics, and computer science" },
   { id: "OAU", name: "Other Academic Units", slug: "other-academic-units", courseCount: 32, fileCount: 124, description: "General studies and interdisciplinary courses" },

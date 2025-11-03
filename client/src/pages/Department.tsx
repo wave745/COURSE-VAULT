@@ -48,6 +48,18 @@ const collegeDepartments: Record<string, Array<{ id: string; name: string; slug:
     { id: "RAD", code: "RAD", name: "Department of Radiology", slug: "radiology", courseCount: 13, fileCount: 89 },
     { id: "SUR", code: "SUR", name: "Department of Surgery", slug: "surgery", courseCount: 21, fileCount: 178 },
   ],
+  "jupeb": [
+    { id: "AGR_JUP", code: "AGR_JUP", name: "Department of Agriculture-Subjects Combination", slug: "agriculture-jupeb", courseCount: 8, fileCount: 34 },
+    { id: "ART_JUP", code: "ART_JUP", name: "Department of Arts-Subjects Combination", slug: "arts-jupeb", courseCount: 9, fileCount: 42 },
+    { id: "EDU_JUP", code: "EDU_JUP", name: "Department of Education-Subjects Combination", slug: "education-jupeb", courseCount: 8, fileCount: 38 },
+    { id: "ENG_JUP", code: "ENG_JUP", name: "Department of Engineering-Subjects Combination", slug: "engineering-jupeb", courseCount: 10, fileCount: 51 },
+    { id: "LAW_JUP", code: "LAW_JUP", name: "Department of Law-Subjects Combination", slug: "law-jupeb", courseCount: 7, fileCount: 29 },
+    { id: "LSC_JUP", code: "LSC_JUP", name: "Department of Life Sciences-Subjects Combination", slug: "life-sciences-jupeb", courseCount: 9, fileCount: 45 },
+    { id: "MED_JUP", code: "MED_JUP", name: "Department of Medicine/Dentistry/Pharmacy/BMS-Subjects Combination", slug: "medicine-jupeb", courseCount: 11, fileCount: 58 },
+    { id: "MGS_JUP", code: "MGS_JUP", name: "Department of Management/Social Sciences-Subjects Combination", slug: "management-jupeb", courseCount: 9, fileCount: 41 },
+    { id: "PSC_JUP", code: "PSC_JUP", name: "Department of Physical Sciences-Subjects Combination", slug: "physical-sciences-jupeb", courseCount: 10, fileCount: 48 },
+    { id: "SSC_JUP", code: "SSC_JUP", name: "Department of Social Sciences-Subjects Combination", slug: "social-sciences-jupeb", courseCount: 8, fileCount: 36 },
+  ],
   "law": [
     { id: "LAW", code: "LAW", name: "Department of Law", slug: "law", courseCount: 45, fileCount: 289 },
   ],
