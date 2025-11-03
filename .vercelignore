@@ -1,0 +1,9 @@
+node_modules
+.git
+.replit
+*.log
+.DS_Store
+dist
+.env.local
+.env*.local
+

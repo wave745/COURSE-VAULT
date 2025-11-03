@@ -12,9 +12,15 @@ declare module "express-session" {
 }
 
 function getBaseUrl(): string {
+  // Vercel deployment
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+  // Replit deployment
   if (process.env.REPL_SLUG && process.env.REPL_OWNER) {
     return `https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co`;
   }
+  // Custom BASE_URL or localhost
   return process.env.BASE_URL || "http://localhost:5000";
 }
 
