@@ -1,78 +1,108 @@
 import { Navbar } from "@/components/Navbar";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
-import { LevelSelector } from "@/components/LevelSelector";
-import { CourseCard } from "@/components/CourseCard";
-import { EmptyState } from "@/components/EmptyState";
-import { useState } from "react";
+import { DepartmentCard } from "@/components/DepartmentCard";
 import { useRoute } from "wouter";
-import { BookOpen } from "lucide-react";
-import emptyCoursesImg from "@assets/generated_images/Empty_courses_illustration_4bb89d06.png";
 
-const mockCourses = {
-  "computer-science": [
-    { id: "1", code: "CSC101", title: "Introduction to Computer Science", semester: "First" as const, level: 100, fileCount: 12 },
-    { id: "2", code: "CSC102", title: "Computer Fundamentals", semester: "Second" as const, level: 100, fileCount: 8 },
-    { id: "3", code: "CSC201", title: "Introduction to Programming", semester: "First" as const, level: 200, fileCount: 24, description: "Python programming and algorithmic thinking" },
-    { id: "4", code: "CSC202", title: "Data Structures and Algorithms", semester: "Second" as const, level: 200, fileCount: 18 },
-    { id: "5", code: "CSC301", title: "Database Management Systems", semester: "First" as const, level: 300, fileCount: 32 },
-    { id: "6", code: "CSC302", title: "Operating Systems", semester: "Second" as const, level: 300, fileCount: 21 },
-    { id: "7", code: "CSC401", title: "Software Engineering", semester: "First" as const, level: 400, fileCount: 28 },
-    { id: "8", code: "CSC402", title: "Computer Networks", semester: "Second" as const, level: 400, fileCount: 19 },
+const collegeDepartments: Record<string, Array<{ id: string; name: string; slug: string; code: string; courseCount: number; fileCount: number }>> = {
+  "arts-social-sciences": [
+    { id: "ECO", code: "ECO", name: "Department of Economics", slug: "economics", courseCount: 18, fileCount: 124 },
+    { id: "ENG", code: "ENG", name: "Department of English", slug: "english", courseCount: 16, fileCount: 89 },
+    { id: "FRL", code: "FRL", name: "Department of Foreign Language", slug: "foreign-language", courseCount: 14, fileCount: 67 },
+    { id: "GRP", code: "GRP", name: "Department of Geography", slug: "geography", courseCount: 15, fileCount: 82 },
+    { id: "IRS", code: "IRS", name: "Department of International Relations", slug: "international-relations", courseCount: 17, fileCount: 95 },
+    { id: "MAS", code: "MAS", name: "Department of Mass Communication", slug: "mass-communication", courseCount: 19, fileCount: 134 },
+    { id: "POL", code: "POL", name: "Department of Political Science", slug: "political-science", courseCount: 16, fileCount: 98 },
+    { id: "SAA", code: "SAA", name: "Department of Sociology", slug: "sociology", courseCount: 15, fileCount: 87 },
+    { id: "THA", code: "THA", name: "Department of Theater Arts and Film Production", slug: "theater-arts", courseCount: 12, fileCount: 76 },
+  ],
+  "business-management": [
+    { id: "ACC", code: "ACC", name: "Department of Accounting", slug: "accounting", courseCount: 20, fileCount: 145 },
+    { id: "BNF", code: "BNF", name: "Department of Banking & Finance", slug: "banking-finance", courseCount: 18, fileCount: 132 },
+    { id: "BUS", code: "BUS", name: "Department of Business Administration", slug: "business-administration", courseCount: 22, fileCount: 167 },
+  ],
+  "engineering": [
+    { id: "CHE", code: "CHE", name: "Department of Chemical Engineering", slug: "chemical-engineering", courseCount: 24, fileCount: 189 },
+    { id: "CVL", code: "CVL", name: "Department of Civil Engineering", slug: "civil-engineering", courseCount: 26, fileCount: 203 },
+    { id: "CPE", code: "CPE", name: "Department of Computer Engineering", slug: "computer-engineering", courseCount: 23, fileCount: 178 },
+    { id: "EEE", code: "EEE", name: "Department of Electrical/Electronics Engineering", slug: "electrical-engineering", courseCount: 25, fileCount: 195 },
+    { id: "MEC", code: "MEC", name: "Department of Mechanical Engineering", slug: "mechanical-engineering", courseCount: 24, fileCount: 182 },
+    { id: "MCT", code: "MCT", name: "Department of Mechatronics Engineering", slug: "mechatronics-engineering", courseCount: 22, fileCount: 156 },
+    { id: "PET", code: "PET", name: "Department of Petroleum Engineering", slug: "petroleum-engineering", courseCount: 21, fileCount: 167 },
+  ],
+  "health-sciences": [
+    { id: "ANA", code: "ANA", name: "Department of Anatomy", slug: "anatomy", courseCount: 18, fileCount: 145 },
+    { id: "BCH", code: "BCH", name: "Department of Biochemistry", slug: "biochemistry", courseCount: 20, fileCount: 167 },
+    { id: "MLS", code: "MLS", name: "Department of Medical Laboratory Science", slug: "medical-lab-science", courseCount: 19, fileCount: 134 },
+    { id: "MED", code: "MED", name: "Department of Medicine & Surgery", slug: "medicine", courseCount: 48, fileCount: 387 },
+    { id: "NUR", code: "NUR", name: "Department of Nursing Science", slug: "nursing", courseCount: 22, fileCount: 198 },
+    { id: "PHY", code: "PHY", name: "Department of Physiology", slug: "physiology", courseCount: 17, fileCount: 142 },
+  ],
+  "law": [
+    { id: "LAW", code: "LAW", name: "Department of Law", slug: "law", courseCount: 45, fileCount: 289 },
+  ],
+  "natural-applied-science": [
+    { id: "CHM", code: "CHM", name: "Department of Chemistry", slug: "chemistry", courseCount: 22, fileCount: 178 },
+    { id: "CSC", code: "CSC", name: "Department of Computer Science", slug: "computer-science", courseCount: 26, fileCount: 234 },
+    { id: "CYB", code: "CYB", name: "Department of Cyber Security", slug: "cyber-security", courseCount: 20, fileCount: 156 },
+    { id: "MIC", code: "MIC", name: "Department of Microbiology", slug: "microbiology", courseCount: 19, fileCount: 145 },
+    { id: "PHY", code: "PHY", name: "Department of Physics", slug: "physics", courseCount: 21, fileCount: 167 },
+    { id: "SWE", code: "SWE", name: "Department of Software Engineering", slug: "software-engineering", courseCount: 24, fileCount: 189 },
+  ],
+  "pharmacy": [
+    { id: "PHM", code: "PHM", name: "Department of Pharmacy", slug: "pharmacy", courseCount: 32, fileCount: 245 },
+    { id: "PHA", code: "PHA", name: "Department of Pharmacology", slug: "pharmacology", courseCount: 20, fileCount: 122 },
   ],
 };
 
-const departmentNames: Record<string, string> = {
-  "computer-science": "Computer Science & Information Technology",
-  "law": "Law",
-  "medicine": "Medicine & Surgery",
+const collegeNames: Record<string, string> = {
+  "arts-social-sciences": "College of Arts and Social Sciences",
+  "business-management": "College of Business and Management Studies",
+  "engineering": "College of Engineering",
+  "health-sciences": "College of Health Sciences",
+  "jupeb": "JUPEB",
+  "law": "College of Law",
+  "natural-applied-science": "College of Natural and Applied Science",
+  "other-academic-units": "Other Academic Units",
+  "pharmacy": "College of Pharmacy",
 };
 
 export default function Department() {
-  const [, params] = useRoute("/department/:slug");
+  const [, params] = useRoute("/college/:slug");
   const slug = params?.slug || "";
-  const [selectedLevel, setSelectedLevel] = useState(200);
 
-  const departmentName = departmentNames[slug] || slug;
-  const allCourses = mockCourses[slug as keyof typeof mockCourses] || [];
-  const filteredCourses = allCourses.filter((course) => course.level === selectedLevel);
+  const collegeName = collegeNames[slug] || slug;
+  const departments = collegeDepartments[slug] || [];
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
 
       <div className="container mx-auto px-4 md:px-6 py-8">
-        <Breadcrumbs items={[{ label: departmentName }]} />
+        <Breadcrumbs items={[{ label: collegeName }]} />
 
         <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold mb-2">{departmentName}</h1>
+          <h1 className="text-3xl md:text-4xl font-bold mb-2">{collegeName}</h1>
           <p className="text-muted-foreground">
-            Browse courses and study materials for this department
+            Select a department to browse courses and study materials
           </p>
-        </div>
-
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold mb-4">Select Level</h2>
-          <LevelSelector selectedLevel={selectedLevel} onLevelChange={setSelectedLevel} />
         </div>
 
         <div className="mb-4">
           <h2 className="text-xl font-semibold">
-            {selectedLevel}L Courses ({filteredCourses.length})
+            Departments ({departments.length})
           </h2>
         </div>
 
-        {filteredCourses.length > 0 ? (
-          <div className="grid gap-4">
-            {filteredCourses.map((course) => (
-              <CourseCard key={course.id} {...course} />
+        {departments.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {departments.map((dept) => (
+              <DepartmentCard key={dept.id} {...dept} isCollege={false} />
             ))}
           </div>
         ) : (
-          <EmptyState
-            imageSrc={emptyCoursesImg}
-            title="No courses found"
-            description={`There are no courses available for ${selectedLevel}L in this department yet.`}
-          />
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">No departments available for this college.</p>
+          </div>
         )}
       </div>
     </div>

@@ -9,6 +9,7 @@ interface DepartmentCardProps {
   description?: string;
   courseCount: number;
   fileCount?: number;
+  isCollege?: boolean;
 }
 
 export function DepartmentCard({
@@ -18,9 +19,12 @@ export function DepartmentCard({
   description,
   courseCount,
   fileCount,
+  isCollege = true,
 }: DepartmentCardProps) {
+  const href = isCollege ? `/college/${slug}` : `/department/${slug}`;
+  
   return (
-    <Link href={`/department/${slug}`} data-testid={`link-department-${id}`}>
+    <Link href={href} data-testid={`link-department-${id}`}>
       <Card className="p-6 hover-elevate active-elevate-2 cursor-pointer h-full flex flex-col gap-4">
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
