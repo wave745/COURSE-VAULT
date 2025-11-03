@@ -1,6 +1,6 @@
 import { Link } from "wouter";
 import { ThemeToggle } from "./ThemeToggle";
-import { Search, Upload, User, GraduationCap } from "lucide-react";
+import { Search, Upload, User, GraduationCap, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -12,6 +12,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { useQuery } from "@tanstack/react-query";
+import { type User as UserType } from "@shared/schema";
 
 interface NavbarProps {
   onSearchChange?: (value: string) => void;
@@ -19,6 +21,14 @@ interface NavbarProps {
 }
 
 export function Navbar({ onSearchChange, searchValue }: NavbarProps) {
+  const { data: user } = useQuery<Partial<UserType>>({
+    queryKey: ["/api/auth/me"],
+    retry: false,
+  });
+
+  const initials = user?.displayName
+    ? user.displayName.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2)
+    : "U";
   return (
     <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4 md:px-6">
@@ -45,49 +55,57 @@ export function Navbar({ onSearchChange, searchValue }: NavbarProps) {
           </div>
 
           <div className="flex items-center gap-2">
-            <Link href="/upload" data-testid="link-upload">
-              <Button variant="default" className="gap-2" data-testid="button-upload">
-                <Upload className="h-4 w-4" />
-                <span className="hidden sm:inline">Upload</span>
-              </Button>
-            </Link>
+            {user && (
+              <Link href="/upload" data-testid="link-upload">
+                <Button variant="default" className="gap-2" data-testid="button-upload">
+                  <Upload className="h-4 w-4" />
+                  <span className="hidden sm:inline">Upload</span>
+                </Button>
+              </Link>
+            )}
 
             <ThemeToggle />
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="rounded-full"
-                  data-testid="button-user-menu"
-                >
-                  <Avatar className="h-8 w-8">
-                    <AvatarFallback className="bg-primary text-primary-foreground">
-                      JD
-                    </AvatarFallback>
-                  </Avatar>
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="rounded-full"
+                    data-testid="button-user-menu"
+                  >
+                    <Avatar className="h-8 w-8">
+                      <AvatarFallback className="bg-primary text-primary-foreground">
+                        {initials}
+                      </AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel>
+                    <div className="flex flex-col gap-1">
+                      <p className="text-sm font-medium">{user.displayName}</p>
+                      <p className="text-xs text-muted-foreground font-mono">{user.vaultId}</p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link href="/profile" data-testid="link-profile">
+                      <User className="mr-2 h-4 w-4" />
+                      <span>Profile</span>
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Link href="/login" data-testid="link-login">
+                <Button variant="default" className="gap-2">
+                  <LogIn className="h-4 w-4" />
+                  <span className="hidden sm:inline">Login</span>
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel>
-                  <div className="flex flex-col gap-1">
-                    <p className="text-sm font-medium">John Doe</p>
-                    <p className="text-xs text-muted-foreground">Computer Science • 300L</p>
-                  </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link href="/profile" data-testid="link-profile">
-                    <User className="mr-2 h-4 w-4" />
-                    <span>Profile</span>
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem data-testid="button-logout">
-                  Logout
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+              </Link>
+            )}
           </div>
         </div>
 

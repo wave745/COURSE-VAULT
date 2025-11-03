@@ -5,10 +5,12 @@ import { z } from "zod";
 
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  username: text("username").notNull().unique(),
-  password: text("password").notNull(),
-  email: text("email"),
+  vaultId: text("vault_id").notNull().unique(),
+  email: text("email").notNull().unique(),
   displayName: text("display_name"),
+  emailVerified: boolean("email_verified").notNull().default(false),
+  verificationToken: text("verification_token"),
+  verificationExpiry: timestamp("verification_expiry"),
   reputation: integer("reputation").notNull().default(0),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
@@ -59,10 +61,24 @@ export const downloads = pgTable("downloads", {
   downloadedAt: timestamp("downloaded_at").notNull().defaultNow(),
 });
 
+export const signupSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  displayName: z.string().min(2, "Display name must be at least 2 characters"),
+});
+
+export const verifyEmailSchema = z.object({
+  token: z.string().min(1, "Verification token is required"),
+});
+
+export const loginSchema = z.object({
+  vaultId: z.string().min(1, "Vault ID is required"),
+});
+
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
   reputation: true,
   createdAt: true,
+  emailVerified: true,
 });
 
 export const insertCollegeSchema = createInsertSchema(colleges);
@@ -97,6 +113,9 @@ export const insertDownloadSchema = createInsertSchema(downloads).omit({
   downloadedAt: true,
 });
 
+export type SignupData = z.infer<typeof signupSchema>;
+export type VerifyEmailData = z.infer<typeof verifyEmailSchema>;
+export type LoginData = z.infer<typeof loginSchema>;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 

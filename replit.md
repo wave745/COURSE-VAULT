@@ -10,6 +10,16 @@ The application follows a traditional academic hierarchy: Colleges → Departmen
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes (November 3, 2025)
+
+### User Authentication System
+- Implemented professional email-based authentication with unique Vault IDs
+- Users register with email and display name, receive email verification
+- After verification, users receive a unique Vault ID (format: VLT-XXXX-XXXX) for login
+- Session-based authentication using express-session
+- All file uploads now require authentication
+- Real user profiles with individual data (no mock data)
+
 ## System Architecture
 
 ### Frontend Architecture
@@ -61,15 +71,23 @@ Preferred communication style: Simple, everyday language.
 
 **API Endpoints Structure**
 - College browsing: `/api/colleges`, `/api/colleges/:slug`, `/api/colleges/:slug/departments`
-- Department lookup: `/api/departments/:slug`
+- Department lookup: `/api/departments/:slug`, `/api/departments` (all departments)
 - Course management: by department, level, and code
-- File operations: CRUD operations with download tracking
-- User management and authentication (prepared but not fully implemented)
+- File operations: CRUD operations with download tracking (requires authentication)
+- Authentication: 
+  - `POST /api/auth/signup` - Create account with email
+  - `POST /api/auth/verify` - Verify email with token
+  - `POST /api/auth/login` - Login with Vault ID
+  - `GET /api/auth/me` - Get current user
+  - `POST /api/auth/logout` - Logout
 
 **Authentication & Sessions**
-- Prepared infrastructure for session management (connect-pg-simple)
-- User schema includes username, password, reputation system
-- Cookie-based authentication pattern (credentials: "include" in fetch)
+- Email-based signup with verification tokens
+- Unique Vault ID system for secure login (VLT-XXXX-XXXX format)
+- Express-session middleware for session management
+- User schema includes email, vaultId, displayName, emailVerified, verificationToken, reputation
+- Session-based authentication with httpOnly cookies
+- Verification emails logged to console (ready for SendGrid/Resend integration)
 
 ### Data Schema Design
 
@@ -80,9 +98,11 @@ Preferred communication style: Simple, everyday language.
 - Files: Attached to courses with verification status, download tracking, file metadata
 
 **User & Reputation System**
-- User profiles with display names and reputation scores
+- User profiles with Vault IDs, email, display names, and reputation scores
 - Download tracking for analytics
 - Verification system for file quality control (verified flag on files)
+- Email verification required before login
+- Individual user vaults with unique IDs for secure access
 
 **Content Organization**
 - Course identification via code + department + level (composite key pattern)

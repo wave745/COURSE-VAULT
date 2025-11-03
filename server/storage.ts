@@ -17,8 +17,11 @@ import { randomUUID } from "crypto";
 
 export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
+  getUserByVaultId(vaultId: string): Promise<User | undefined>;
+  getUserByVerificationToken(token: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  updateUser(id: string, updates: Partial<User>): Promise<User | undefined>;
 
   getColleges(): Promise<College[]>;
   getCollege(id: string): Promise<College | undefined>;
@@ -75,22 +78,41 @@ export class MemStorage implements IStorage {
     return this.users.get(id);
   }
 
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find((user) => user.username === username);
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    return Array.from(this.users.values()).find((user) => user.email === email);
+  }
+
+  async getUserByVaultId(vaultId: string): Promise<User | undefined> {
+    return Array.from(this.users.values()).find((user) => user.vaultId === vaultId);
+  }
+
+  async getUserByVerificationToken(token: string): Promise<User | undefined> {
+    return Array.from(this.users.values()).find((user) => user.verificationToken === token);
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = randomUUID();
     const user: User = { 
       ...insertUser, 
-      id, 
-      email: insertUser.email ?? null,
+      id,
       displayName: insertUser.displayName ?? null,
+      verificationToken: insertUser.verificationToken ?? null,
+      verificationExpiry: insertUser.verificationExpiry ?? null,
+      emailVerified: false,
       reputation: 0, 
       createdAt: new Date() 
     };
     this.users.set(id, user);
     return user;
+  }
+
+  async updateUser(id: string, updates: Partial<User>): Promise<User | undefined> {
+    const user = this.users.get(id);
+    if (!user) return undefined;
+    
+    const updatedUser = { ...user, ...updates };
+    this.users.set(id, updatedUser);
+    return updatedUser;
   }
 
   async getColleges(): Promise<College[]> {
