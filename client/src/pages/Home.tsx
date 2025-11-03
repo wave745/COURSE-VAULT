@@ -1,30 +1,27 @@
 import { Navbar } from "@/components/Navbar";
 import { DepartmentCard } from "@/components/DepartmentCard";
 import { StatsCard } from "@/components/StatsCard";
-import { BookOpen, FileText, Users, TrendingUp } from "lucide-react";
+import { BookOpen, FileText, Users } from "lucide-react";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import heroImage from "@assets/generated_images/University_library_study_scene_5c31f025.png";
-
-const colleges = [
-  { id: "ASS", name: "College of Arts and Social Sciences", slug: "arts-social-sciences", courseCount: 142, fileCount: 856, description: "9 departments including Economics, English, Mass Communication" },
-  { id: "BMS", name: "College of Business and Management Studies", slug: "business-management", courseCount: 98, fileCount: 612, description: "Business, economics, and management disciplines" },
-  { id: "ENG", name: "College of Engineering", slug: "engineering", courseCount: 221, fileCount: 1483, description: "10 departments including Chemical, Civil, Mechanical, Petroleum Engineering" },
-  { id: "HSC", name: "College of Health Sciences", slug: "health-sciences", courseCount: 275, fileCount: 2191, description: "14 departments including Medicine, Surgery, Nursing, Radiology" },
-  { id: "JUPEB", name: "JUPEB", slug: "jupeb", courseCount: 89, fileCount: 422, description: "10 subject combinations for pre-degree studies" },
-  { id: "LAW", name: "College of Law", slug: "law", courseCount: 45, fileCount: 289, description: "Legal practice, jurisprudence, and statutory law" },
-  { id: "NAS", name: "College of Natural and Applied Science", slug: "natural-applied-science", courseCount: 167, fileCount: 1043, description: "Pure and applied sciences, mathematics, and computer science" },
-  { id: "OAU", name: "Other Academic Units", slug: "other-academic-units", courseCount: 32, fileCount: 124, description: "General studies and interdisciplinary courses" },
-  { id: "PHM", name: "College of Pharmacy", slug: "pharmacy", courseCount: 52, fileCount: 367, description: "Pharmaceutical sciences and clinical pharmacy" },
-];
+import { useQuery } from "@tanstack/react-query";
+import { motion } from "framer-motion";
+import type { College } from "@shared/schema";
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
 
+  const { data: colleges = [], isLoading } = useQuery<College[]>({
+    queryKey: ["/api/colleges"],
+  });
+
   const filteredColleges = colleges.filter((college) =>
     college.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const totalColleges = colleges.length;
 
   return (
     <div className="min-h-screen bg-background">
@@ -59,36 +56,77 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="py-12 md:py-16 border-b">
+      <motion.section 
+        className="py-12 md:py-16 border-b"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+      >
         <div className="container mx-auto px-4 md:px-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <StatsCard title="Colleges" value={9} icon={BookOpen} />
-            <StatsCard title="Courses" value="961" icon={FileText} />
-            <StatsCard title="Files Shared" value="6,179" icon={FileText} />
-            <StatsCard title="Active Students" value="3,400+" icon={Users} description="Contributing daily" />
+            <StatsCard title="Colleges" value={totalColleges} icon={BookOpen} />
+            <StatsCard title="Departments" value={60} icon={FileText} />
+            <StatsCard title="Students" value="2,500+" icon={Users} description="Active users" />
+            <StatsCard title="Resources" value="Growing" icon={FileText} description="Upload & share" />
           </div>
         </div>
-      </section>
+      </motion.section>
 
       <section className="py-12 md:py-20">
         <div className="container mx-auto px-4 md:px-6">
-          <div className="mb-8">
+          <motion.div 
+            className="mb-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+          >
             <h2 className="text-3xl font-bold mb-2">Browse by College</h2>
             <p className="text-muted-foreground">
               Select your college to access course materials and study resources
             </p>
-          </div>
+          </motion.div>
 
-          {filteredColleges.length > 0 ? (
+          {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredColleges.map((college) => (
-                <DepartmentCard key={college.id} {...college} />
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="h-48 bg-card rounded-lg animate-pulse" />
               ))}
             </div>
+          ) : filteredColleges.length > 0 ? (
+            <motion.div 
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+              initial="hidden"
+              animate="show"
+              variants={{
+                hidden: { opacity: 0 },
+                show: {
+                  opacity: 1,
+                  transition: {
+                    staggerChildren: 0.1
+                  }
+                }
+              }}
+            >
+              {filteredColleges.map((college) => (
+                <motion.div
+                  key={college.id}
+                  variants={{
+                    hidden: { opacity: 0, y: 20 },
+                    show: { opacity: 1, y: 0 }
+                  }}
+                >
+                  <DepartmentCard {...college} description={college.description || undefined} courseCount={0} fileCount={0} />
+                </motion.div>
+              ))}
+            </motion.div>
           ) : (
-            <div className="text-center py-12">
+            <motion.div 
+              className="text-center py-12"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+            >
               <p className="text-muted-foreground">No colleges found matching "{searchQuery}"</p>
-            </div>
+            </motion.div>
           )}
         </div>
       </section>

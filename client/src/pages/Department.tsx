@@ -2,136 +2,97 @@ import { Navbar } from "@/components/Navbar";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { DepartmentCard } from "@/components/DepartmentCard";
 import { useRoute } from "wouter";
-
-const collegeDepartments: Record<string, Array<{ id: string; name: string; slug: string; code: string; courseCount: number; fileCount: number }>> = {
-  "arts-social-sciences": [
-    { id: "ECO", code: "ECO", name: "Department of Economics", slug: "economics", courseCount: 18, fileCount: 124 },
-    { id: "ENG", code: "ENG", name: "Department of English", slug: "english", courseCount: 16, fileCount: 89 },
-    { id: "FRL", code: "FRL", name: "Department of Foreign Language", slug: "foreign-language", courseCount: 14, fileCount: 67 },
-    { id: "GRP", code: "GRP", name: "Department of Geography", slug: "geography", courseCount: 15, fileCount: 82 },
-    { id: "IRS", code: "IRS", name: "Department of International Relations", slug: "international-relations", courseCount: 17, fileCount: 95 },
-    { id: "MAS", code: "MAS", name: "Department of Mass Communication", slug: "mass-communication", courseCount: 19, fileCount: 134 },
-    { id: "POL", code: "POL", name: "Department of Political Science", slug: "political-science", courseCount: 16, fileCount: 98 },
-    { id: "SAA", code: "SAA", name: "Department of Sociology", slug: "sociology", courseCount: 15, fileCount: 87 },
-    { id: "THA", code: "THA", name: "Department of Theater Arts and Film Production", slug: "theater-arts", courseCount: 12, fileCount: 76 },
-  ],
-  "business-management": [
-    { id: "ACC", code: "ACC", name: "Department of Accounting", slug: "accounting", courseCount: 20, fileCount: 145 },
-    { id: "BFN", code: "BFN", name: "Department of Finance", slug: "finance", courseCount: 18, fileCount: 132 },
-    { id: "BUS", code: "BUS", name: "Department of Business Administration", slug: "business-administration", courseCount: 22, fileCount: 167 },
-  ],
-  "engineering": [
-    { id: "CHE", code: "CHE", name: "Department of Chemical Engineering", slug: "chemical-engineering", courseCount: 24, fileCount: 189 },
-    { id: "CME", code: "CME", name: "Department of Computer Engineering", slug: "computer-engineering", courseCount: 23, fileCount: 178 },
-    { id: "CVE", code: "CVE", name: "Department of Civil Engineering", slug: "civil-engineering", courseCount: 26, fileCount: 203 },
-    { id: "ECE", code: "ECE", name: "Department of Electrical and Computer Engineering", slug: "electrical-computer-engineering", courseCount: 22, fileCount: 167 },
-    { id: "EEE", code: "EEE", name: "Department of Electrical/Electronics Engineering", slug: "electrical-engineering", courseCount: 25, fileCount: 195 },
-    { id: "EVE", code: "EVE", name: "Department of Environmental Engineering", slug: "environmental-engineering", courseCount: 18, fileCount: 134 },
-    { id: "FDS", code: "FDS", name: "Department of Food Science", slug: "food-science", courseCount: 16, fileCount: 112 },
-    { id: "MEE", code: "MEE", name: "Department of Mechanical Engineering", slug: "mechanical-engineering", courseCount: 24, fileCount: 182 },
-    { id: "MTE", code: "MTE", name: "Department of Mechatronics Engineering", slug: "mechatronics-engineering", courseCount: 22, fileCount: 156 },
-    { id: "PET", code: "PET", name: "Department of Petroleum Engineering", slug: "petroleum-engineering", courseCount: 21, fileCount: 167 },
-  ],
-  "health-sciences": [
-    { id: "ANA", code: "ANA", name: "Department of Anatomy", slug: "anatomy", courseCount: 18, fileCount: 145 },
-    { id: "BMS", code: "BMS", name: "School of Basic Medical Science", slug: "basic-medical-science", courseCount: 24, fileCount: 189 },
-    { id: "MED", code: "MED", name: "Department of Medicine", slug: "medicine", courseCount: 42, fileCount: 356 },
-    { id: "MLS", code: "MLS", name: "Department of Medical Laboratory Science", slug: "medical-lab-science", courseCount: 19, fileCount: 134 },
-    { id: "NUR", code: "NUR", name: "Department of Nursing Science", slug: "nursing", courseCount: 22, fileCount: 198 },
-    { id: "OBS", code: "OBS", name: "Department of Obstetrics & Gynecology", slug: "obstetrics-gynecology", courseCount: 16, fileCount: 127 },
-    { id: "OPH", code: "OPH", name: "Department of Ophthalmology", slug: "ophthalmology", courseCount: 14, fileCount: 98 },
-    { id: "ORT", code: "ORT", name: "Department of Orthopedic surgeon", slug: "orthopedic", courseCount: 15, fileCount: 112 },
-    { id: "PED", code: "PED", name: "Department of Pediatrics", slug: "pediatrics", courseCount: 18, fileCount: 143 },
-    { id: "PHS", code: "PHS", name: "Department of Physiology", slug: "physiology", courseCount: 17, fileCount: 142 },
-    { id: "PMS", code: "PMS", name: "Medical Sciences", slug: "medical-sciences", courseCount: 20, fileCount: 156 },
-    { id: "PMY", code: "PMY", name: "Department of Pharmacology", slug: "pharmacology", courseCount: 16, fileCount: 124 },
-    { id: "RAD", code: "RAD", name: "Department of Radiology", slug: "radiology", courseCount: 13, fileCount: 89 },
-    { id: "SUR", code: "SUR", name: "Department of Surgery", slug: "surgery", courseCount: 21, fileCount: 178 },
-  ],
-  "jupeb": [
-    { id: "AGR_JUP", code: "AGR_JUP", name: "Department of Agriculture-Subjects Combination", slug: "agriculture-jupeb", courseCount: 8, fileCount: 34 },
-    { id: "ART_JUP", code: "ART_JUP", name: "Department of Arts-Subjects Combination", slug: "arts-jupeb", courseCount: 9, fileCount: 42 },
-    { id: "EDU_JUP", code: "EDU_JUP", name: "Department of Education-Subjects Combination", slug: "education-jupeb", courseCount: 8, fileCount: 38 },
-    { id: "ENG_JUP", code: "ENG_JUP", name: "Department of Engineering-Subjects Combination", slug: "engineering-jupeb", courseCount: 10, fileCount: 51 },
-    { id: "LAW_JUP", code: "LAW_JUP", name: "Department of Law-Subjects Combination", slug: "law-jupeb", courseCount: 7, fileCount: 29 },
-    { id: "LSC_JUP", code: "LSC_JUP", name: "Department of Life Sciences-Subjects Combination", slug: "life-sciences-jupeb", courseCount: 9, fileCount: 45 },
-    { id: "MED_JUP", code: "MED_JUP", name: "Department of Medicine/Dentistry/Pharmacy/BMS-Subjects Combination", slug: "medicine-jupeb", courseCount: 11, fileCount: 58 },
-    { id: "MGS_JUP", code: "MGS_JUP", name: "Department of Management/Social Sciences-Subjects Combination", slug: "management-jupeb", courseCount: 9, fileCount: 41 },
-    { id: "PSC_JUP", code: "PSC_JUP", name: "Department of Physical Sciences-Subjects Combination", slug: "physical-sciences-jupeb", courseCount: 10, fileCount: 48 },
-    { id: "SSC_JUP", code: "SSC_JUP", name: "Department of Social Sciences-Subjects Combination", slug: "social-sciences-jupeb", courseCount: 8, fileCount: 36 },
-  ],
-  "law": [
-    { id: "LAW", code: "LAW", name: "Department of LAW", slug: "law", courseCount: 45, fileCount: 289 },
-  ],
-  "natural-applied-science": [
-    { id: "CHM", code: "CHM", name: "Department of Chemistry", slug: "chemistry", courseCount: 22, fileCount: 178 },
-    { id: "CSC", code: "CSC", name: "Department of Computer Science", slug: "computer-science", courseCount: 26, fileCount: 234 },
-    { id: "CYB", code: "CYB", name: "Department of Cyber Security", slug: "cyber-security", courseCount: 20, fileCount: 156 },
-    { id: "MIC", code: "MIC", name: "Department of Microbiology", slug: "microbiology", courseCount: 19, fileCount: 145 },
-    { id: "PHY", code: "PHY", name: "Department of Physics", slug: "physics", courseCount: 21, fileCount: 167 },
-    { id: "SWE", code: "SWE", name: "Department of Software Engineering", slug: "software-engineering", courseCount: 24, fileCount: 189 },
-  ],
-  "other-academic-units": [
-    { id: "CSP", code: "CSP", name: "Community Service Programme (CSP)", slug: "community-service-programme", courseCount: 6, fileCount: 24 },
-    { id: "EPS", code: "EPS", name: "Entrepreneurship Studies (EPS)", slug: "entrepreneurship-studies", courseCount: 8, fileCount: 32 },
-    { id: "GST", code: "GST", name: "Department of General Studies (GST)", slug: "general-studies", courseCount: 10, fileCount: 42 },
-    { id: "IUTIS", code: "IUTIS", name: "Department of Igbenedion University Industrial Training Scheme (IUTIS)", slug: "industrial-training-scheme", courseCount: 4, fileCount: 12 },
-    { id: "OUC", code: "OUC", name: "Department of General (OUC)", slug: "general-ouc", courseCount: 4, fileCount: 14 },
-  ],
-  "pharmacy": [
-    { id: "PHM", code: "PHM", name: "Department of PHARMACY (PHM)", slug: "pharmacy", courseCount: 52, fileCount: 367 },
-  ],
-};
-
-const collegeNames: Record<string, string> = {
-  "arts-social-sciences": "College of Arts and Social Sciences",
-  "business-management": "College of Business and Management Studies",
-  "engineering": "College of Engineering",
-  "health-sciences": "College of Health Sciences",
-  "jupeb": "JUPEB",
-  "law": "College of Law",
-  "natural-applied-science": "College of Natural and Applied Science",
-  "other-academic-units": "Other Academic Units",
-  "pharmacy": "College of Pharmacy",
-};
+import { useQuery } from "@tanstack/react-query";
+import { motion } from "framer-motion";
+import type { Department, College } from "@shared/schema";
 
 export default function Department() {
   const [, params] = useRoute("/college/:slug");
   const slug = params?.slug || "";
 
-  const collegeName = collegeNames[slug] || slug;
-  const departments = collegeDepartments[slug] || [];
+  const { data: college, isLoading: collegeLoading } = useQuery<College>({
+    queryKey: ["/api/colleges", slug],
+    enabled: !!slug,
+  });
+
+  const { data: departments = [], isLoading: departmentsLoading } = useQuery<Department[]>({
+    queryKey: ["/api/colleges", slug, "departments"],
+    enabled: !!slug,
+  });
+
+  const isLoading = collegeLoading || departmentsLoading;
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
 
       <div className="container mx-auto px-4 md:px-6 py-8">
-        <Breadcrumbs items={[{ label: collegeName }]} />
+        <Breadcrumbs items={[{ label: college?.name || slug }]} />
 
-        <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold mb-2">{collegeName}</h1>
+        <motion.div 
+          className="mb-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <h1 className="text-3xl md:text-4xl font-bold mb-2">{college?.name || slug}</h1>
           <p className="text-muted-foreground">
-            Select a department to browse courses and study materials
+            {college?.description || "Select a department to browse courses and study materials"}
           </p>
-        </div>
+        </motion.div>
 
-        <div className="mb-4">
+        <motion.div 
+          className="mb-4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+        >
           <h2 className="text-xl font-semibold">
             Departments ({departments.length})
           </h2>
-        </div>
+        </motion.div>
 
-        {departments.length > 0 ? (
+        {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {departments.map((dept) => (
-              <DepartmentCard key={dept.id} {...dept} isCollege={false} />
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="h-48 bg-card rounded-lg animate-pulse" />
             ))}
           </div>
+        ) : departments.length > 0 ? (
+          <motion.div 
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            initial="hidden"
+            animate="show"
+            variants={{
+              hidden: { opacity: 0 },
+              show: {
+                opacity: 1,
+                transition: {
+                  staggerChildren: 0.08
+                }
+              }
+            }}
+          >
+            {departments.map((dept) => (
+              <motion.div
+                key={dept.id}
+                variants={{
+                  hidden: { opacity: 0, scale: 0.95 },
+                  show: { opacity: 1, scale: 1 }
+                }}
+              >
+                <DepartmentCard {...dept} name={dept.name} description={dept.name} courseCount={0} fileCount={0} isCollege={false} />
+              </motion.div>
+            ))}
+          </motion.div>
         ) : (
-          <div className="text-center py-12">
+          <motion.div 
+            className="text-center py-12"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+          >
             <p className="text-muted-foreground">No departments available for this college.</p>
-          </div>
+          </motion.div>
         )}
       </div>
     </div>
