@@ -3,9 +3,8 @@ import { DepartmentCard } from "@/components/DepartmentCard";
 import { StatsCard } from "@/components/StatsCard";
 import { BookOpen, FileText, Users } from "lucide-react";
 import { useState } from "react";
-import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
 import heroImage from "@assets/generated_images/University_library_study_scene_5c31f025.png";
+import iuoLogo from "@assets/IUO-LOGO.png";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import type { College } from "@shared/schema";
@@ -51,19 +50,6 @@ export default function Home() {
           <p className="text-lg md:text-xl text-white/90 mb-8 max-w-2xl mx-auto">
             Browse, upload, and download study materials shared by students across all departments and levels
           </p>
-          <div className="max-w-2xl mx-auto">
-            <div className="relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-              <Input
-                type="search"
-                placeholder="Search colleges, courses, or files..."
-                className="pl-11 h-14 rounded-full text-base bg-background/90 backdrop-blur"
-                data-testid="input-hero-search"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-          </div>
         </div>
       </section>
 
@@ -83,8 +69,15 @@ export default function Home() {
         </div>
       </motion.section>
 
-      <section className="py-12 md:py-20">
-        <div className="container mx-auto px-4 md:px-6">
+      <section 
+        className="py-12 md:py-20 relative bg-cover bg-center bg-no-repeat"
+        style={{
+          backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.85)), url(${iuoLogo})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
+      >
+        <div className="container mx-auto px-4 md:px-6 relative">
           <motion.div 
             className="mb-8"
             initial={{ opacity: 0, y: 20 }}
