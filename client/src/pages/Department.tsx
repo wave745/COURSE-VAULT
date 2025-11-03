@@ -22,11 +22,14 @@ const collegeDepartments: Record<string, Array<{ id: string; name: string; slug:
   ],
   "engineering": [
     { id: "CHE", code: "CHE", name: "Department of Chemical Engineering", slug: "chemical-engineering", courseCount: 24, fileCount: 189 },
-    { id: "CVL", code: "CVL", name: "Department of Civil Engineering", slug: "civil-engineering", courseCount: 26, fileCount: 203 },
-    { id: "CPE", code: "CPE", name: "Department of Computer Engineering", slug: "computer-engineering", courseCount: 23, fileCount: 178 },
+    { id: "CME", code: "CME", name: "Department of Computer Engineering", slug: "computer-engineering", courseCount: 23, fileCount: 178 },
+    { id: "CVE", code: "CVE", name: "Department of Civil Engineering", slug: "civil-engineering", courseCount: 26, fileCount: 203 },
+    { id: "ECE", code: "ECE", name: "Department of Electrical and Computer Engineering", slug: "electrical-computer-engineering", courseCount: 22, fileCount: 167 },
     { id: "EEE", code: "EEE", name: "Department of Electrical/Electronics Engineering", slug: "electrical-engineering", courseCount: 25, fileCount: 195 },
-    { id: "MEC", code: "MEC", name: "Department of Mechanical Engineering", slug: "mechanical-engineering", courseCount: 24, fileCount: 182 },
-    { id: "MCT", code: "MCT", name: "Department of Mechatronics Engineering", slug: "mechatronics-engineering", courseCount: 22, fileCount: 156 },
+    { id: "EVE", code: "EVE", name: "Department of Environmental Engineering", slug: "environmental-engineering", courseCount: 18, fileCount: 134 },
+    { id: "FDS", code: "FDS", name: "Department of Food Science", slug: "food-science", courseCount: 16, fileCount: 112 },
+    { id: "MEE", code: "MEE", name: "Department of Mechanical Engineering", slug: "mechanical-engineering", courseCount: 24, fileCount: 182 },
+    { id: "MTE", code: "MTE", name: "Department of Mechatronics Engineering", slug: "mechatronics-engineering", courseCount: 22, fileCount: 156 },
     { id: "PET", code: "PET", name: "Department of Petroleum Engineering", slug: "petroleum-engineering", courseCount: 21, fileCount: 167 },
   ],
   "health-sciences": [
