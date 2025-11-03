@@ -35,7 +35,7 @@ export function Navbar({ onSearchChange, searchValue }: NavbarProps) {
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <Input
                 type="search"
-                placeholder="Search courses, files, or departments..."
+                placeholder="Search courses, files, or colleges..."
                 className="pl-11 h-12 rounded-full"
                 data-testid="input-search"
                 value={searchValue}
