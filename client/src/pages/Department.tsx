@@ -71,9 +71,15 @@ const collegeDepartments: Record<string, Array<{ id: string; name: string; slug:
     { id: "PHY", code: "PHY", name: "Department of Physics", slug: "physics", courseCount: 21, fileCount: 167 },
     { id: "SWE", code: "SWE", name: "Department of Software Engineering", slug: "software-engineering", courseCount: 24, fileCount: 189 },
   ],
+  "other-academic-units": [
+    { id: "CSP", code: "CSP", name: "Community Service Programme (CSP)", slug: "community-service-programme", courseCount: 6, fileCount: 24 },
+    { id: "EPS", code: "EPS", name: "Entrepreneurship Studies (EPS)", slug: "entrepreneurship-studies", courseCount: 8, fileCount: 32 },
+    { id: "GST", code: "GST", name: "Department of General Studies (GST)", slug: "general-studies", courseCount: 10, fileCount: 42 },
+    { id: "IUTIS", code: "IUTIS", name: "Department of Igbenedion University Industrial Training Scheme (IUTIS)", slug: "industrial-training-scheme", courseCount: 4, fileCount: 12 },
+    { id: "OUC", code: "OUC", name: "Department of General (OUC)", slug: "general-ouc", courseCount: 4, fileCount: 14 },
+  ],
   "pharmacy": [
-    { id: "PHM", code: "PHM", name: "Department of Pharmacy", slug: "pharmacy", courseCount: 32, fileCount: 245 },
-    { id: "PHA", code: "PHA", name: "Department of Pharmacology", slug: "pharmacology", courseCount: 20, fileCount: 122 },
+    { id: "PHM", code: "PHM", name: "Department of PHARMACY (PHM)", slug: "pharmacy", courseCount: 52, fileCount: 367 },
   ],
 };
 
