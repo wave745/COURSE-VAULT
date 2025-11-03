@@ -166,6 +166,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ message: "Logged out successfully" });
     });
   });
+  app.get("/api/stats", async (_req, res) => {
+    try {
+      const colleges = await storage.getColleges();
+      const departments = await storage.getDepartments();
+      const files = await storage.getFiles();
+      
+      const userCount = 0;
+      
+      res.json({
+        colleges: colleges.length,
+        departments: departments.length,
+        students: userCount,
+        files: files.length,
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch stats" });
+    }
+  });
+
   app.get("/api/colleges", async (_req, res) => {
     try {
       const colleges = await storage.getColleges();

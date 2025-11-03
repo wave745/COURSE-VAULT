@@ -10,6 +10,13 @@ import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import type { College } from "@shared/schema";
 
+interface Stats {
+  colleges: number;
+  departments: number;
+  students: number;
+  files: number;
+}
+
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -17,11 +24,15 @@ export default function Home() {
     queryKey: ["/api/colleges"],
   });
 
+  const { data: stats } = useQuery<Stats>({
+    queryKey: ["/api/stats"],
+  });
+
   const filteredColleges = colleges.filter((college) =>
     college.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const totalColleges = colleges.length;
+  const totalColleges = stats?.colleges ?? colleges.length;
 
   return (
     <div className="min-h-screen bg-background">
@@ -65,9 +76,9 @@ export default function Home() {
         <div className="container mx-auto px-4 md:px-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <StatsCard title="Colleges" value={totalColleges} icon={BookOpen} />
-            <StatsCard title="Departments" value={60} icon={FileText} />
-            <StatsCard title="Students" value="2,500+" icon={Users} description="Active users" />
-            <StatsCard title="Resources" value="Growing" icon={FileText} description="Upload & share" />
+            <StatsCard title="Departments" value={stats?.departments ?? 60} icon={FileText} />
+            <StatsCard title="Students" value={stats?.students ?? 0} icon={Users} description="Active users" />
+            <StatsCard title="Resources" value={stats?.files ?? 0} icon={FileText} description="Files uploaded" />
           </div>
         </div>
       </motion.section>
