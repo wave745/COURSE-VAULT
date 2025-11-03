@@ -11,9 +11,16 @@ import {
   type InsertFile,
   type Download,
   type InsertDownload,
+  users,
+  colleges,
+  departments,
+  courses,
+  files,
+  downloads,
 } from "@shared/schema";
 import { seedColleges, seedDepartments } from "./seed-data";
 import { randomUUID } from "crypto";
+import { eq, and, desc } from "drizzle-orm";
 
 export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
@@ -252,4 +259,217 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export class DatabaseStorage implements IStorage {
+  async getUser(id: string): Promise<User | undefined> {
+    if (!process.env.DATABASE_URL) return undefined;
+    const { db } = await import("./db");
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    if (!process.env.DATABASE_URL) return undefined;
+    const { db } = await import("./db");
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user || undefined;
+  }
+
+  async getUserByVaultId(vaultId: string): Promise<User | undefined> {
+    if (!process.env.DATABASE_URL) return undefined;
+    const { db } = await import("./db");
+    const [user] = await db.select().from(users).where(eq(users.vaultId, vaultId));
+    return user || undefined;
+  }
+
+  async getUserByVerificationToken(token: string): Promise<User | undefined> {
+    if (!process.env.DATABASE_URL) return undefined;
+    const { db } = await import("./db");
+    const [user] = await db.select().from(users).where(eq(users.verificationToken, token));
+    return user || undefined;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    if (!process.env.DATABASE_URL) throw new Error("Database not available");
+    const { db } = await import("./db");
+    const [user] = await db.insert(users).values(insertUser).returning();
+    return user;
+  }
+
+  async updateUser(id: string, updates: Partial<User>): Promise<User | undefined> {
+    if (!process.env.DATABASE_URL) return undefined;
+    const { db } = await import("./db");
+    const [user] = await db.update(users).set(updates).where(eq(users.id, id)).returning();
+    return user || undefined;
+  }
+
+  async getColleges(): Promise<College[]> {
+    if (!process.env.DATABASE_URL) return [];
+    const { db } = await import("./db");
+    const collegeList = await db.select().from(colleges);
+    if (collegeList.length === 0) {
+      await db.insert(colleges).values(seedColleges);
+      return seedColleges as College[];
+    }
+    return collegeList;
+  }
+
+  async getCollege(id: string): Promise<College | undefined> {
+    if (!process.env.DATABASE_URL) return undefined;
+    const { db } = await import("./db");
+    const [college] = await db.select().from(colleges).where(eq(colleges.id, id));
+    return college || undefined;
+  }
+
+  async getCollegeBySlug(slug: string): Promise<College | undefined> {
+    if (!process.env.DATABASE_URL) return undefined;
+    const { db } = await import("./db");
+    const [college] = await db.select().from(colleges).where(eq(colleges.slug, slug));
+    return college || undefined;
+  }
+
+  async createCollege(insertCollege: InsertCollege): Promise<College> {
+    if (!process.env.DATABASE_URL) throw new Error("Database not available");
+    const { db } = await import("./db");
+    const [college] = await db.insert(colleges).values(insertCollege).returning();
+    return college;
+  }
+
+  async getDepartments(collegeId?: string): Promise<Department[]> {
+    if (!process.env.DATABASE_URL) return [];
+    const { db } = await import("./db");
+    const departmentList = collegeId 
+      ? await db.select().from(departments).where(eq(departments.collegeId, collegeId))
+      : await db.select().from(departments);
+    
+    if (departmentList.length === 0 && !collegeId) {
+      await db.insert(departments).values(seedDepartments);
+      return seedDepartments as Department[];
+    }
+    return departmentList;
+  }
+
+  async getDepartment(id: string): Promise<Department | undefined> {
+    if (!process.env.DATABASE_URL) return undefined;
+    const { db } = await import("./db");
+    const [department] = await db.select().from(departments).where(eq(departments.id, id));
+    return department || undefined;
+  }
+
+  async getDepartmentBySlug(slug: string): Promise<Department | undefined> {
+    if (!process.env.DATABASE_URL) return undefined;
+    const { db } = await import("./db");
+    const [department] = await db.select().from(departments).where(eq(departments.slug, slug));
+    return department || undefined;
+  }
+
+  async createDepartment(insertDepartment: InsertDepartment): Promise<Department> {
+    if (!process.env.DATABASE_URL) throw new Error("Database not available");
+    const { db } = await import("./db");
+    const [department] = await db.insert(departments).values(insertDepartment).returning();
+    return department;
+  }
+
+  async getCourses(departmentId?: string): Promise<Course[]> {
+    if (!process.env.DATABASE_URL) return [];
+    const { db } = await import("./db");
+    return departmentId
+      ? await db.select().from(courses).where(eq(courses.departmentId, departmentId))
+      : await db.select().from(courses);
+  }
+
+  async getCourse(id: string): Promise<Course | undefined> {
+    if (!process.env.DATABASE_URL) return undefined;
+    const { db } = await import("./db");
+    const [course] = await db.select().from(courses).where(eq(courses.id, id));
+    return course || undefined;
+  }
+
+  async getCoursesByLevel(departmentId: string, level: number): Promise<Course[]> {
+    if (!process.env.DATABASE_URL) return [];
+    const { db } = await import("./db");
+    return await db.select().from(courses).where(
+      and(eq(courses.departmentId, departmentId), eq(courses.level, level))
+    );
+  }
+
+  async getCourseByCode(departmentId: string, code: string, level: number): Promise<Course | undefined> {
+    if (!process.env.DATABASE_URL) return undefined;
+    const { db } = await import("./db");
+    const [course] = await db.select().from(courses).where(
+      and(
+        eq(courses.departmentId, departmentId),
+        eq(courses.code, code),
+        eq(courses.level, level)
+      )
+    );
+    return course || undefined;
+  }
+
+  async createCourse(insertCourse: InsertCourse): Promise<Course> {
+    if (!process.env.DATABASE_URL) throw new Error("Database not available");
+    const { db } = await import("./db");
+    const [course] = await db.insert(courses).values(insertCourse).returning();
+    return course;
+  }
+
+  async findOrCreateCourse(departmentId: string, code: string, title: string, level: number): Promise<Course> {
+    const existing = await this.getCourseByCode(departmentId, code, level);
+    if (existing) {
+      return existing;
+    }
+    return this.createCourse({
+      departmentId,
+      code,
+      title,
+      level,
+    });
+  }
+
+  async getFiles(courseId?: string): Promise<File[]> {
+    if (!process.env.DATABASE_URL) return [];
+    const { db } = await import("./db");
+    return courseId
+      ? await db.select().from(files).where(eq(files.courseId, courseId)).orderBy(desc(files.uploadedAt))
+      : await db.select().from(files).orderBy(desc(files.uploadedAt));
+  }
+
+  async getFile(id: string): Promise<File | undefined> {
+    if (!process.env.DATABASE_URL) return undefined;
+    const { db } = await import("./db");
+    const [file] = await db.select().from(files).where(eq(files.id, id));
+    return file || undefined;
+  }
+
+  async createFile(insertFile: InsertFile): Promise<File> {
+    if (!process.env.DATABASE_URL) throw new Error("Database not available");
+    const { db } = await import("./db");
+    const [file] = await db.insert(files).values(insertFile).returning();
+    return file;
+  }
+
+  async incrementDownloadCount(fileId: string): Promise<void> {
+    if (!process.env.DATABASE_URL) return;
+    const { db } = await import("./db");
+    const file = await this.getFile(fileId);
+    if (file) {
+      await db.update(files)
+        .set({ downloadCount: file.downloadCount + 1 })
+        .where(eq(files.id, fileId));
+    }
+  }
+
+  async createDownload(insertDownload: InsertDownload): Promise<Download> {
+    if (!process.env.DATABASE_URL) throw new Error("Database not available");
+    const { db } = await import("./db");
+    const [download] = await db.insert(downloads).values(insertDownload).returning();
+    return download;
+  }
+
+  async getUserDownloads(userId: string): Promise<Download[]> {
+    if (!process.env.DATABASE_URL) return [];
+    const { db } = await import("./db");
+    return await db.select().from(downloads).where(eq(downloads.userId, userId));
+  }
+}
+
+export const storage = process.env.DATABASE_URL ? new DatabaseStorage() : new MemStorage();
