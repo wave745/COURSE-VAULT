@@ -17,7 +17,7 @@ const collegeDepartments: Record<string, Array<{ id: string; name: string; slug:
   ],
   "business-management": [
     { id: "ACC", code: "ACC", name: "Department of Accounting", slug: "accounting", courseCount: 20, fileCount: 145 },
-    { id: "BNF", code: "BNF", name: "Department of Banking & Finance", slug: "banking-finance", courseCount: 18, fileCount: 132 },
+    { id: "BFN", code: "BFN", name: "Department of Finance", slug: "finance", courseCount: 18, fileCount: 132 },
     { id: "BUS", code: "BUS", name: "Department of Business Administration", slug: "business-administration", courseCount: 22, fileCount: 167 },
   ],
   "engineering": [
