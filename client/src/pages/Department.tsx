@@ -61,7 +61,7 @@ const collegeDepartments: Record<string, Array<{ id: string; name: string; slug:
     { id: "SSC_JUP", code: "SSC_JUP", name: "Department of Social Sciences-Subjects Combination", slug: "social-sciences-jupeb", courseCount: 8, fileCount: 36 },
   ],
   "law": [
-    { id: "LAW", code: "LAW", name: "Department of Law", slug: "law", courseCount: 45, fileCount: 289 },
+    { id: "LAW", code: "LAW", name: "Department of LAW", slug: "law", courseCount: 45, fileCount: 289 },
   ],
   "natural-applied-science": [
     { id: "CHM", code: "CHM", name: "Department of Chemistry", slug: "chemistry", courseCount: 22, fileCount: 178 },
