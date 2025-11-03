@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { uploadFormSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/colleges", async (_req, res) => {
@@ -80,6 +81,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(files);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch files" });
+    }
+  });
+
+  app.get("/api/departments", async (_req, res) => {
+    try {
+      const departments = await storage.getDepartments();
+      res.json(departments);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch departments" });
+    }
+  });
+
+  app.post("/api/files", async (req, res) => {
+    try {
+      const validatedData = uploadFormSchema.parse(req.body);
+      
+      const course = await storage.findOrCreateCourse(
+        validatedData.departmentId,
+        validatedData.courseCode,
+        validatedData.courseTitle || validatedData.courseCode,
+        parseInt(validatedData.level)
+      );
+
+      const mockUserId = "mock-user-id";
+      
+      const file = await storage.createFile({
+        courseId: course.id,
+        userId: mockUserId,
+        title: validatedData.title,
+        fileName: "uploaded-file.pdf",
+        fileType: "application/pdf",
+        fileUrl: `/uploads/${Date.now()}-file.pdf`,
+        fileSize: 0,
+      });
+
+      res.status(201).json(file);
+    } catch (error) {
+      if (error instanceof Error) {
+        res.status(400).json({ message: error.message });
+      } else {
+        res.status(500).json({ message: "Failed to upload file" });
+      }
     }
   });
 

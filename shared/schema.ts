@@ -80,6 +80,15 @@ export const insertFileSchema = createInsertSchema(files).omit({
   uploadedAt: true,
 });
 
+export const uploadFormSchema = z.object({
+  departmentId: z.string().min(1, "Department is required"),
+  level: z.string().min(1, "Level is required"),
+  courseCode: z.string().min(1, "Course code is required"),
+  courseTitle: z.string().optional(),
+  title: z.string().min(1, "Title is required"),
+  description: z.string().optional(),
+});
+
 export const insertDownloadSchema = createInsertSchema(downloads).omit({
   id: true,
   downloadedAt: true,
@@ -99,6 +108,8 @@ export type Course = typeof courses.$inferSelect;
 
 export type InsertFile = z.infer<typeof insertFileSchema>;
 export type File = typeof files.$inferSelect;
+
+export type UploadForm = z.infer<typeof uploadFormSchema>;
 
 export type InsertDownload = z.infer<typeof insertDownloadSchema>;
 export type Download = typeof downloads.$inferSelect;

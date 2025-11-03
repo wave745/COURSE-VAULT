@@ -33,7 +33,9 @@ export interface IStorage {
   getCourses(departmentId?: string): Promise<Course[]>;
   getCourse(id: string): Promise<Course | undefined>;
   getCoursesByLevel(departmentId: string, level: number): Promise<Course[]>;
+  getCourseByCode(departmentId: string, code: string, level: number): Promise<Course | undefined>;
   createCourse(course: InsertCourse): Promise<Course>;
+  findOrCreateCourse(departmentId: string, code: string, title: string, level: number): Promise<Course>;
 
   getFiles(courseId?: string): Promise<File[]>;
   getFile(id: string): Promise<File | undefined>;
@@ -149,6 +151,12 @@ export class MemStorage implements IStorage {
     );
   }
 
+  async getCourseByCode(departmentId: string, code: string, level: number): Promise<Course | undefined> {
+    return Array.from(this.courses.values()).find(
+      (c) => c.departmentId === departmentId && c.code === code && c.level === level
+    );
+  }
+
   async createCourse(insertCourse: InsertCourse): Promise<Course> {
     const id = randomUUID();
     const course: Course = { 
@@ -159,6 +167,19 @@ export class MemStorage implements IStorage {
     };
     this.courses.set(id, course);
     return course;
+  }
+
+  async findOrCreateCourse(departmentId: string, code: string, title: string, level: number): Promise<Course> {
+    const existing = await this.getCourseByCode(departmentId, code, level);
+    if (existing) {
+      return existing;
+    }
+    return this.createCourse({
+      departmentId,
+      code,
+      title,
+      level,
+    });
   }
 
   async getFiles(courseId?: string): Promise<File[]> {
