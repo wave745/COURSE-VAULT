@@ -11,17 +11,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Upload as UploadIcon, FileText, X } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-
-const departments = [
-  "Computer Science & Information Technology",
-  "Law",
-  "Medicine & Surgery",
-  "Engineering",
-  "Business Management",
-];
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { uploadFormSchema, type UploadForm, type Department } from "@shared/schema";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 
 const levels = ["100", "200", "300", "400", "500", "600"];
 
@@ -29,6 +34,44 @@ export default function Upload() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [dragActive, setDragActive] = useState(false);
   const { toast } = useToast();
+
+  const { data: departments, isLoading: departmentsLoading } = useQuery<Department[]>({
+    queryKey: ["/api/departments"],
+  });
+
+  const form = useForm<UploadForm>({
+    resolver: zodResolver(uploadFormSchema),
+    defaultValues: {
+      departmentId: "",
+      level: "",
+      courseCode: "",
+      courseTitle: "",
+      title: "",
+      description: "",
+    },
+  });
+
+  const uploadMutation = useMutation({
+    mutationFn: async (data: UploadForm) => {
+      return apiRequest("POST", "/api/files", data);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Upload successful",
+        description: "Your file has been uploaded and is pending verification.",
+      });
+      form.reset();
+      setSelectedFile(null);
+      queryClient.invalidateQueries({ queryKey: ["/api/courses"] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Upload failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -56,13 +99,16 @@ export default function Upload() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Upload submitted");
-    toast({
-      title: "Upload successful",
-      description: "Your file has been uploaded and is pending verification.",
-    });
+  const onSubmit = (data: UploadForm) => {
+    if (!selectedFile) {
+      toast({
+        title: "No file selected",
+        description: "Please select a file to upload.",
+        variant: "destructive",
+      });
+      return;
+    }
+    uploadMutation.mutate(data);
   };
 
   return (
@@ -77,72 +123,122 @@ export default function Upload() {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit}>
-          <Card className="p-6 md:p-8 space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="department">Department *</Label>
-              <Select required>
-                <SelectTrigger id="department" data-testid="select-department">
-                  <SelectValue placeholder="Select department" />
-                </SelectTrigger>
-                <SelectContent>
-                  {departments.map((dept) => (
-                    <SelectItem key={dept} value={dept}>
-                      {dept}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
+            <Card className="p-6 md:p-8 space-y-6">
+              <FormField
+                control={form.control}
+                name="departmentId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Department *</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger data-testid="select-department">
+                          <SelectValue placeholder="Select department" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {departmentsLoading ? (
+                          <SelectItem value="loading" disabled>
+                            Loading departments...
+                          </SelectItem>
+                        ) : (
+                          departments?.map((dept) => (
+                            <SelectItem key={dept.id} value={dept.id}>
+                              {dept.name}
+                            </SelectItem>
+                          ))
+                        )}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="level">Level *</Label>
-                <Select required>
-                  <SelectTrigger id="level" data-testid="select-level">
-                    <SelectValue placeholder="Select level" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {levels.map((level) => (
-                      <SelectItem key={level} value={level}>
-                        {level}L
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="level"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Level *</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger data-testid="select-level">
+                            <SelectValue placeholder="Select level" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {levels.map((level) => (
+                            <SelectItem key={level} value={level}>
+                              {level}L
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <div className="space-y-2">
-                <Label htmlFor="course-code">Course Code *</Label>
-                <Input
-                  id="course-code"
-                  placeholder="e.g., CSC201"
-                  required
-                  data-testid="input-course-code"
-                  className="font-mono"
+                <FormField
+                  control={form.control}
+                  name="courseCode"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Course Code *</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="e.g., CSC201"
+                          data-testid="input-course-code"
+                          className="font-mono"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
               </div>
-            </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="title">File Title *</Label>
-              <Input
-                id="title"
-                placeholder="e.g., Lecture Notes - Week 5"
-                required
-                data-testid="input-title"
+              <FormField
+                control={form.control}
+                name="title"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>File Title *</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="e.g., Lecture Notes - Week 5"
+                        data-testid="input-title"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="description">Description (Optional)</Label>
-              <Textarea
-                id="description"
-                placeholder="Brief description of the file content..."
-                rows={3}
-                data-testid="input-description"
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description (Optional)</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Brief description of the file content..."
+                        rows={3}
+                        data-testid="input-description"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
 
             <div className="space-y-2">
               <Label>File Upload *</Label>
@@ -202,21 +298,27 @@ export default function Upload() {
               </div>
             </div>
 
-            <div className="flex gap-4 pt-4">
-              <Button type="submit" className="flex-1" data-testid="button-submit-upload">
-                Upload File
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => window.history.back()}
-                data-testid="button-cancel"
-              >
-                Cancel
-              </Button>
-            </div>
-          </Card>
-        </form>
+              <div className="flex gap-4 pt-4">
+                <Button 
+                  type="submit" 
+                  className="flex-1" 
+                  data-testid="button-submit-upload"
+                  disabled={uploadMutation.isPending || !selectedFile}
+                >
+                  {uploadMutation.isPending ? "Uploading..." : "Upload File"}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => window.history.back()}
+                  data-testid="button-cancel"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </Card>
+          </form>
+        </Form>
       </div>
     </div>
   );
