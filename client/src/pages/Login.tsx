@@ -79,9 +79,42 @@ export default function Login() {
                   <FormControl>
                     <Input
                       placeholder="VLT-XXXX-XXXX"
-                      className="font-mono text-center text-lg tracking-wider"
+                      className="font-mono text-center text-lg tracking-wider uppercase"
                       data-testid="input-vault-id"
+                      maxLength={13}
                       {...field}
+                      onChange={(e) => {
+                        // Auto-format Vault ID: VLT-XXXX-XXXX
+                        let value = e.target.value.toUpperCase();
+                        
+                        // Remove all non-alphanumeric characters except dashes
+                        value = value.replace(/[^A-F0-9-]/g, '');
+                        
+                        // If user is typing, format as they type
+                        if (value.startsWith('VLT')) {
+                          // Remove existing dashes and reformat
+                          const cleaned = value.replace(/-/g, '').replace(/^VLT/, '');
+                          if (cleaned.length <= 8) {
+                            value = 'VLT-' + cleaned.slice(0, 4);
+                            if (cleaned.length > 4) {
+                              value += '-' + cleaned.slice(4, 8);
+                            }
+                          } else {
+                            value = 'VLT-' + cleaned.slice(0, 4) + '-' + cleaned.slice(4, 8);
+                          }
+                        } else if (value.length > 0) {
+                          // If no VLT prefix, add it
+                          const cleaned = value.replace(/-/g, '');
+                          if (cleaned.length <= 11) {
+                            value = 'VLT-' + cleaned.slice(0, 4);
+                            if (cleaned.length > 4) {
+                              value += '-' + cleaned.slice(4, 8);
+                            }
+                          }
+                        }
+                        
+                        field.onChange(value);
+                      }}
                     />
                   </FormControl>
                   <FormMessage />

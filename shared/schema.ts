@@ -71,8 +71,19 @@ export const verifyEmailSchema = z.object({
 });
 
 export const loginSchema = z.object({
-  vaultId: z.string().min(1, "Vault ID is required"),
+  vaultId: z.string()
+    .min(1, "Vault ID is required")
+    .regex(/^VLT-[A-F0-9]{4}-[A-F0-9]{4}$/i, "Invalid Vault ID format. Format: VLT-XXXX-XXXX"),
 });
+
+export const resendVerificationSchema = z.object({
+  email: z.string().email("Invalid email address"),
+});
+
+export type SignupData = z.infer<typeof signupSchema>;
+export type LoginData = z.infer<typeof loginSchema>;
+export type VerifyEmailData = z.infer<typeof verifyEmailSchema>;
+export type ResendVerificationData = z.infer<typeof resendVerificationSchema>;
 
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,

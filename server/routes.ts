@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { uploadFormSchema, signupSchema, verifyEmailSchema, loginSchema, type User } from "@shared/schema";
 import { generateVaultId, generateVerificationToken, getVerificationExpiry, isTokenExpired } from "./auth-utils";
+import { sendEmail, createVerificationEmailHtml, createVerificationEmailText } from "./email-service";
 
 declare module "express-session" {
   interface SessionData {
@@ -10,19 +11,26 @@ declare module "express-session" {
   }
 }
 
+function getBaseUrl(): string {
+  if (process.env.REPL_SLUG && process.env.REPL_OWNER) {
+    return `https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co`;
+  }
+  return process.env.BASE_URL || "http://localhost:5000";
+}
+
 async function sendVerificationEmail(email: string, token: string, vaultId: string) {
-  const verificationUrl = `${process.env.REPL_SLUG ? `https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co` : 'http://localhost:5000'}/verify?token=${token}`;
+  const baseUrl = getBaseUrl();
+  const verificationUrl = `${baseUrl}/verify?token=${token}`;
   
-  console.log(`
-╔════════════════════════════════════════════════════════════════╗
-║                   EMAIL VERIFICATION                            ║
-╠════════════════════════════════════════════════════════════════╣
-║ To: ${email.padEnd(56)} ║
-║ Vault ID: ${vaultId.padEnd(51)} ║
-║ Verification Link:                                             ║
-║ ${verificationUrl.padEnd(62)} ║
-╚════════════════════════════════════════════════════════════════╝
-  `);
+  const html = createVerificationEmailHtml(email, verificationUrl, vaultId);
+  const text = createVerificationEmailText(email, verificationUrl, vaultId);
+  
+  await sendEmail({
+    to: email,
+    subject: "Verify Your Email - IUO Student Archive",
+    html,
+    text,
+  });
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -73,7 +81,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       if (isTokenExpired(user.verificationExpiry)) {
-        return res.status(400).json({ message: "Verification token has expired" });
+        return res.status(400).json({ 
+          message: "Verification token has expired. Please request a new verification email.",
+          expired: true 
+        });
+      }
+      
+      if (user.emailVerified) {
+        return res.status(400).json({ message: "Email is already verified. You can log in now." });
       }
       
       await storage.updateUser(user.id, {
@@ -91,6 +106,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.status(400).json({ message: error.message });
       } else {
         res.status(500).json({ message: "Verification failed" });
+      }
+    }
+  });
+
+  app.post("/api/auth/resend-verification", async (req, res) => {
+    try {
+      const { email } = req.body;
+      
+      if (!email || typeof email !== "string") {
+        return res.status(400).json({ message: "Email is required" });
+      }
+      
+      const user = await storage.getUserByEmail(email);
+      
+      if (!user) {
+        // Don't reveal if email exists or not (security best practice)
+        return res.json({
+          message: "If an account exists with this email, a verification link has been sent.",
+        });
+      }
+      
+      if (user.emailVerified) {
+        return res.status(400).json({ message: "Email is already verified. You can log in now." });
+      }
+      
+      // Generate new verification token
+      const verificationToken = generateVerificationToken();
+      const verificationExpiry = getVerificationExpiry();
+      
+      await storage.updateUser(user.id, {
+        verificationToken,
+        verificationExpiry,
+      });
+      
+      await sendVerificationEmail(user.email, verificationToken, user.vaultId);
+      
+      res.json({
+        message: "Verification email sent! Please check your inbox.",
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        res.status(400).json({ message: error.message });
+      } else {
+        res.status(500).json({ message: "Failed to resend verification email" });
       }
     }
   });
@@ -271,6 +330,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(departments);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch departments" });
+    }
+  });
+
+  app.get("/api/users/:userId/files", async (req, res) => {
+    try {
+      if (!req.session.userId || req.session.userId !== req.params.userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      // Get all files and filter by userId
+      const allFiles = await storage.getFiles();
+      const userFiles = allFiles.filter((file) => file.userId === req.params.userId);
+      
+      res.json(userFiles);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch user files" });
+    }
+  });
+
+  app.get("/api/departments/:id", async (req, res) => {
+    try {
+      const department = await storage.getDepartment(req.params.id);
+      if (!department) {
+        return res.status(404).json({ message: "Department not found" });
+      }
+      res.json(department);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch department" });
+    }
+  });
+
+  app.get("/api/users/:userId/downloads", async (req, res) => {
+    try {
+      if (!req.session.userId || req.session.userId !== req.params.userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const downloads = await storage.getUserDownloads(req.params.userId);
+      res.json(downloads);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch downloads" });
     }
   });
 

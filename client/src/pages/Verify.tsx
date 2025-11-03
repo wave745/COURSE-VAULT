@@ -1,10 +1,22 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { resendVerificationSchema, type ResendVerificationData } from "@shared/schema";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Link, useLocation, useSearch } from "wouter";
-import { CheckCircle, XCircle, Loader2 } from "lucide-react";
+import { CheckCircle, XCircle, Loader2, Mail } from "lucide-react";
 import { useEffect, useState } from "react";
 
 export default function Verify() {
@@ -70,18 +82,110 @@ export default function Verify() {
     );
   }
 
+  const resendForm = useForm<ResendVerificationData>({
+    resolver: zodResolver(resendVerificationSchema),
+    defaultValues: {
+      email: "",
+    },
+  });
+
+  const resendMutation = useMutation({
+    mutationFn: async (data: ResendVerificationData) => {
+      const res = await apiRequest("POST", "/api/auth/resend-verification", data);
+      return res.json();
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Email sent!",
+        description: data.message,
+      });
+      resendForm.reset();
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Failed to resend email",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const isExpired = verifyMutation.error?.message?.includes("expired") || 
+                     (verifyMutation.error as any)?.expired === true;
+
   if (verifyMutation.isError) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <Card className="w-full max-w-md p-8 text-center">
+        <Card className="w-full max-w-md p-8">
           <XCircle className="h-16 w-16 text-destructive mx-auto mb-4" />
-          <h1 className="text-2xl font-bold mb-2">Verification Failed</h1>
-          <p className="text-muted-foreground mb-6">
+          <h1 className="text-2xl font-bold mb-2 text-center">Verification Failed</h1>
+          <p className="text-muted-foreground mb-6 text-center">
             {verifyMutation.error?.message || "Unable to verify your email."}
           </p>
-          <Link href="/signup">
-            <Button variant="outline" data-testid="button-go-to-signup">Try Again</Button>
-          </Link>
+
+          {isExpired && (
+            <div className="mb-6">
+              <p className="text-sm text-muted-foreground mb-4 text-center">
+                Your verification link has expired. Request a new one below:
+              </p>
+              <Form {...resendForm}>
+                <form 
+                  onSubmit={resendForm.handleSubmit((data) => resendMutation.mutate(data))} 
+                  className="space-y-4"
+                >
+                  <FormField
+                    control={resendForm.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email Address</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="email"
+                            placeholder="your.email@example.com"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <Button
+                    type="submit"
+                    className="w-full"
+                    disabled={resendMutation.isPending}
+                  >
+                    {resendMutation.isPending ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Sending...
+                      </>
+                    ) : (
+                      <>
+                        <Mail className="mr-2 h-4 w-4" />
+                        Resend Verification Email
+                      </>
+                    )}
+                  </Button>
+                </form>
+              </Form>
+            </div>
+          )}
+
+          <div className="flex gap-2">
+            <Link href="/signup" className="flex-1">
+              <Button variant="outline" className="w-full" data-testid="button-go-to-signup">
+                Go to Signup
+              </Button>
+            </Link>
+            {!isExpired && (
+              <Link href="/login" className="flex-1">
+                <Button variant="default" className="w-full">
+                  Go to Login
+                </Button>
+              </Link>
+            )}
+          </div>
         </Card>
       </div>
     );

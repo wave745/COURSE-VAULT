@@ -11,17 +11,18 @@ import {
 } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { signupSchema, type SignupData } from "@shared/schema";
+import { signupSchema, resendVerificationSchema, type SignupData, type ResendVerificationData } from "@shared/schema";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
-import { UserPlus } from "lucide-react";
+import { UserPlus, Mail, Loader2 } from "lucide-react";
 import { useState } from "react";
 
 export default function Signup() {
   const { toast } = useToast();
   const [vaultId, setVaultId] = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState<string>("");
 
   const form = useForm<SignupData>({
     resolver: zodResolver(signupSchema),
@@ -38,6 +39,7 @@ export default function Signup() {
     },
     onSuccess: (data) => {
       setVaultId(data.vaultId);
+      setUserEmail(form.getValues("email"));
       toast({
         title: "Account created!",
         description: data.message,
@@ -52,8 +54,40 @@ export default function Signup() {
     },
   });
 
+  const resendForm = useForm<ResendVerificationData>({
+    resolver: zodResolver(resendVerificationSchema),
+    defaultValues: {
+      email: "",
+    },
+  });
+
+  const resendMutation = useMutation({
+    mutationFn: async (data: ResendVerificationData) => {
+      const res = await apiRequest("POST", "/api/auth/resend-verification", data);
+      return res.json();
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Email sent!",
+        description: data.message,
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Failed to resend email",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   const onSubmit = (data: SignupData) => {
     signupMutation.mutate(data);
+  };
+
+  const handleResend = () => {
+    resendForm.setValue("email", userEmail);
+    resendMutation.mutate({ email: userEmail });
   };
 
   return (
@@ -79,7 +113,7 @@ export default function Signup() {
               </p>
             </div>
             
-            <div className="bg-muted rounded-lg p-4">
+            <div className="bg-muted rounded-lg p-4 mb-4">
               <p className="text-sm mb-2">
                 <strong>Next steps:</strong>
               </p>
@@ -90,11 +124,33 @@ export default function Signup() {
               </ol>
             </div>
 
-            <Link href="/login">
-              <Button className="w-full" data-testid="button-go-to-login">
-                Go to Login
+            <div className="space-y-2">
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={handleResend}
+                disabled={resendMutation.isPending}
+                data-testid="button-resend-email"
+              >
+                {resendMutation.isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    <Mail className="mr-2 h-4 w-4" />
+                    Resend Verification Email
+                  </>
+                )}
               </Button>
-            </Link>
+
+              <Link href="/login">
+                <Button className="w-full" data-testid="button-go-to-login">
+                  Go to Login
+                </Button>
+              </Link>
+            </div>
           </div>
         ) : (
           <Form {...form}>

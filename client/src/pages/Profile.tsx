@@ -62,7 +62,37 @@ export default function Profile() {
     ? user.displayName.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2)
     : "U";
 
-  const mockUploads: any[] = [];
+  const { data: userFiles = [], isLoading: filesLoading } = useQuery({
+    queryKey: ["/api/users", user.id, "files"],
+    enabled: !!user.id,
+  });
+
+  const { data: userDownloads = [], isLoading: downloadsLoading } = useQuery({
+    queryKey: ["/api/users", user.id, "downloads"],
+    enabled: !!user.id,
+  });
+
+  // Transform files to match FileCard component expectations
+  const uploads = userFiles.map((file: any) => {
+    const fileType = file.fileType?.toLowerCase() || "";
+    let type: "pdf" | "image" | "docx" | "other" = "other";
+    if (fileType.includes("pdf")) type = "pdf";
+    else if (fileType.includes("image") || ["png", "jpg", "jpeg", "gif"].some(ext => fileType.includes(ext))) type = "image";
+    else if (fileType.includes("docx") || fileType.includes("doc")) type = "docx";
+
+    return {
+      id: file.id,
+      title: file.title,
+      type,
+      uploadedBy: user.displayName || "You",
+      uploadedAt: file.uploadedAt,
+      downloadCount: file.downloadCount,
+      verified: file.verified,
+    };
+  });
+
+  const totalUploads = uploads.length;
+  const totalDownloadsCount = uploads.reduce((acc: number, file: any) => acc + file.downloadCount, 0);
   
   return (
     <div className="min-h-screen bg-background">
@@ -111,7 +141,9 @@ export default function Profile() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground mb-1">Files Uploaded</p>
-                <p className="text-3xl font-bold" data-testid="text-uploads-count">0</p>
+                <p className="text-3xl font-bold" data-testid="text-uploads-count">
+                  {filesLoading ? "..." : totalUploads}
+                </p>
               </div>
               <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
                 <Upload className="h-6 w-6 text-primary" />
@@ -123,7 +155,9 @@ export default function Profile() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground mb-1">Total Downloads</p>
-                <p className="text-3xl font-bold">0</p>
+                <p className="text-3xl font-bold">
+                  {filesLoading ? "..." : totalDownloadsCount}
+                </p>
               </div>
               <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
                 <Download className="h-6 w-6 text-primary" />
@@ -155,9 +189,15 @@ export default function Profile() {
           </TabsList>
 
           <TabsContent value="uploads" className="mt-6">
-            {mockUploads.length > 0 ? (
+            {filesLoading ? (
               <div className="grid gap-4">
-                {mockUploads.map((file) => (
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="h-24 bg-muted rounded-lg animate-pulse" />
+                ))}
+              </div>
+            ) : uploads.length > 0 ? (
+              <div className="grid gap-4">
+                {uploads.map((file) => (
                   <FileCard
                     key={file.id}
                     {...file}
@@ -171,17 +211,36 @@ export default function Profile() {
                 title="No uploads yet"
                 description="You haven't uploaded any files yet. Start sharing your study materials!"
                 actionLabel="Upload File"
-                onAction={() => console.log("Upload clicked")}
+                onAction={() => setLocation("/upload")}
               />
             )}
           </TabsContent>
 
           <TabsContent value="downloads" className="mt-6">
-            <EmptyState
-              icon={Download}
-              title="No downloads yet"
-              description="Files you download will appear here for easy access."
-            />
+            {downloadsLoading ? (
+              <div className="grid gap-4">
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="h-24 bg-muted rounded-lg animate-pulse" />
+                ))}
+              </div>
+            ) : userDownloads.length > 0 ? (
+              <div className="grid gap-4">
+                {userDownloads.map((download: any) => (
+                  <div key={download.id} className="p-4 border rounded-lg">
+                    <p className="text-sm text-muted-foreground">
+                      Downloaded on {new Date(download.downloadedAt).toLocaleDateString()}
+                    </p>
+                    {/* TODO: Fetch and display file details */}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <EmptyState
+                icon={Download}
+                title="No downloads yet"
+                description="Files you download will appear here for easy access."
+              />
+            )}
           </TabsContent>
         </Tabs>
       </div>
