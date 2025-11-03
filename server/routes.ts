@@ -106,14 +106,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const mockUserId = "mock-user-id";
       
+      const timestamp = Date.now();
+      const sanitizedFileName = validatedData.fileName.replace(/[^a-zA-Z0-9.-]/g, '_');
+      
       const file = await storage.createFile({
         courseId: course.id,
         userId: mockUserId,
         title: validatedData.title,
-        fileName: "uploaded-file.pdf",
-        fileType: "application/pdf",
-        fileUrl: `/uploads/${Date.now()}-file.pdf`,
-        fileSize: 0,
+        fileName: validatedData.fileName,
+        fileType: validatedData.fileType,
+        fileUrl: `/uploads/${timestamp}-${sanitizedFileName}`,
+        fileSize: validatedData.fileSize,
       });
 
       res.status(201).json(file);

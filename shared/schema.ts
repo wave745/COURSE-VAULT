@@ -87,6 +87,9 @@ export const uploadFormSchema = z.object({
   courseTitle: z.string().optional(),
   title: z.string().min(1, "Title is required"),
   description: z.string().optional(),
+  fileName: z.string().min(1, "File name is required"),
+  fileType: z.string().min(1, "File type is required"),
+  fileSize: z.number().min(1, "File size is required"),
 });
 
 export const insertDownloadSchema = createInsertSchema(downloads).omit({

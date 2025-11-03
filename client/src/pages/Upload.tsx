@@ -48,6 +48,9 @@ export default function Upload() {
       courseTitle: "",
       title: "",
       description: "",
+      fileName: "",
+      fileType: "",
+      fileSize: 0,
     },
   });
 
@@ -108,7 +111,15 @@ export default function Upload() {
       });
       return;
     }
-    uploadMutation.mutate(data);
+    
+    const uploadData: UploadForm = {
+      ...data,
+      fileName: selectedFile.name,
+      fileType: selectedFile.type || "application/octet-stream",
+      fileSize: selectedFile.size,
+    };
+    
+    uploadMutation.mutate(uploadData);
   };
 
   return (
