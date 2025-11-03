@@ -1,0 +1,128 @@
+import type { InsertCollege, InsertDepartment } from "@shared/schema";
+
+export const seedColleges: InsertCollege[] = [
+  {
+    id: "ASS",
+    name: "College of Arts and Social Sciences",
+    slug: "arts-social-sciences",
+    description: "9 departments including Economics, English, Mass Communication",
+  },
+  {
+    id: "BMS",
+    name: "College of Business and Management Studies",
+    slug: "business-management",
+    description: "Business, economics, and management disciplines",
+  },
+  {
+    id: "ENG",
+    name: "College of Engineering",
+    slug: "engineering",
+    description: "10 departments including Chemical, Civil, Mechanical, Petroleum Engineering",
+  },
+  {
+    id: "HSC",
+    name: "College of Health Sciences",
+    slug: "health-sciences",
+    description: "14 departments including Medicine, Surgery, Nursing, Radiology",
+  },
+  {
+    id: "JUPEB",
+    name: "JUPEB",
+    slug: "jupeb",
+    description: "10 subject combinations for pre-degree studies",
+  },
+  {
+    id: "LAW",
+    name: "College of Law",
+    slug: "law",
+    description: "Legal practice, jurisprudence, and statutory law",
+  },
+  {
+    id: "NAS",
+    name: "College of Natural and Applied Science",
+    slug: "natural-applied-science",
+    description: "Pure and applied sciences, mathematics, and computer science",
+  },
+  {
+    id: "OAU",
+    name: "Other Academic Units",
+    slug: "other-academic-units",
+    description: "General studies and interdisciplinary courses",
+  },
+  {
+    id: "PHM",
+    name: "College of Pharmacy",
+    slug: "pharmacy",
+    description: "Pharmaceutical sciences and clinical pharmacy",
+  },
+];
+
+export const seedDepartments: InsertDepartment[] = [
+  { id: "ECO", collegeId: "ASS", code: "ECO", name: "Department of Economics", slug: "economics" },
+  { id: "ENG_ASS", collegeId: "ASS", code: "ENG", name: "Department of English", slug: "english" },
+  { id: "FRL", collegeId: "ASS", code: "FRL", name: "Department of Foreign Language", slug: "foreign-language" },
+  { id: "GRP", collegeId: "ASS", code: "GRP", name: "Department of Geography", slug: "geography" },
+  { id: "IRS", collegeId: "ASS", code: "IRS", name: "Department of International Relations", slug: "international-relations" },
+  { id: "MAS", collegeId: "ASS", code: "MAS", name: "Department of Mass Communication", slug: "mass-communication" },
+  { id: "POL", collegeId: "ASS", code: "POL", name: "Department of Political Science", slug: "political-science" },
+  { id: "SAA", collegeId: "ASS", code: "SAA", name: "Department of Sociology", slug: "sociology" },
+  { id: "THA", collegeId: "ASS", code: "THA", name: "Department of Theater Arts and Film Production", slug: "theater-arts" },
+
+  { id: "ACC", collegeId: "BMS", code: "ACC", name: "Department of Accounting", slug: "accounting" },
+  { id: "BFN", collegeId: "BMS", code: "BFN", name: "Department of Finance", slug: "finance" },
+  { id: "BUS", collegeId: "BMS", code: "BUS", name: "Department of Business Administration", slug: "business-administration" },
+
+  { id: "CHE", collegeId: "ENG", code: "CHE", name: "Department of Chemical Engineering", slug: "chemical-engineering" },
+  { id: "CME", collegeId: "ENG", code: "CME", name: "Department of Computer Engineering", slug: "computer-engineering" },
+  { id: "CVE", collegeId: "ENG", code: "CVE", name: "Department of Civil Engineering", slug: "civil-engineering" },
+  { id: "ECE", collegeId: "ENG", code: "ECE", name: "Department of Electrical and Computer Engineering", slug: "electrical-computer-engineering" },
+  { id: "EEE", collegeId: "ENG", code: "EEE", name: "Department of Electrical/Electronics Engineering", slug: "electrical-engineering" },
+  { id: "EVE", collegeId: "ENG", code: "EVE", name: "Department of Environmental Engineering", slug: "environmental-engineering" },
+  { id: "FDS", collegeId: "ENG", code: "FDS", name: "Department of Food Science", slug: "food-science" },
+  { id: "MEE", collegeId: "ENG", code: "MEE", name: "Department of Mechanical Engineering", slug: "mechanical-engineering" },
+  { id: "MTE", collegeId: "ENG", code: "MTE", name: "Department of Mechatronics Engineering", slug: "mechatronics-engineering" },
+  { id: "PET", collegeId: "ENG", code: "PET", name: "Department of Petroleum Engineering", slug: "petroleum-engineering" },
+
+  { id: "ANA", collegeId: "HSC", code: "ANA", name: "Department of Anatomy", slug: "anatomy" },
+  { id: "BMS_HSC", collegeId: "HSC", code: "BMS", name: "School of Basic Medical Science", slug: "basic-medical-science" },
+  { id: "MED", collegeId: "HSC", code: "MED", name: "Department of Medicine", slug: "medicine" },
+  { id: "MLS", collegeId: "HSC", code: "MLS", name: "Department of Medical Laboratory Science", slug: "medical-lab-science" },
+  { id: "NUR", collegeId: "HSC", code: "NUR", name: "Department of Nursing Science", slug: "nursing" },
+  { id: "OBS", collegeId: "HSC", code: "OBS", name: "Department of Obstetrics & Gynecology", slug: "obstetrics-gynecology" },
+  { id: "OPH", collegeId: "HSC", code: "OPH", name: "Department of Ophthalmology", slug: "ophthalmology" },
+  { id: "ORT", collegeId: "HSC", code: "ORT", name: "Department of Orthopedic surgeon", slug: "orthopedic" },
+  { id: "PED", collegeId: "HSC", code: "PED", name: "Department of Pediatrics", slug: "pediatrics" },
+  { id: "PHS", collegeId: "HSC", code: "PHS", name: "Department of Physiology", slug: "physiology" },
+  { id: "PMS", collegeId: "HSC", code: "PMS", name: "Medical Sciences", slug: "medical-sciences" },
+  { id: "PMY", collegeId: "HSC", code: "PMY", name: "Department of Pharmacology", slug: "pharmacology" },
+  { id: "RAD", collegeId: "HSC", code: "RAD", name: "Department of Radiology", slug: "radiology" },
+  { id: "SUR", collegeId: "HSC", code: "SUR", name: "Department of Surgery", slug: "surgery" },
+
+  { id: "AGR_JUP", collegeId: "JUPEB", code: "AGR_JUP", name: "Department of Agriculture-Subjects Combination", slug: "agriculture-jupeb" },
+  { id: "ART_JUP", collegeId: "JUPEB", code: "ART_JUP", name: "Department of Arts-Subjects Combination", slug: "arts-jupeb" },
+  { id: "EDU_JUP", collegeId: "JUPEB", code: "EDU_JUP", name: "Department of Education-Subjects Combination", slug: "education-jupeb" },
+  { id: "ENG_JUP", collegeId: "JUPEB", code: "ENG_JUP", name: "Department of Engineering-Subjects Combination", slug: "engineering-jupeb" },
+  { id: "LAW_JUP", collegeId: "JUPEB", code: "LAW_JUP", name: "Department of Law-Subjects Combination", slug: "law-jupeb" },
+  { id: "LSC_JUP", collegeId: "JUPEB", code: "LSC_JUP", name: "Department of Life Sciences-Subjects Combination", slug: "life-sciences-jupeb" },
+  { id: "MED_JUP", collegeId: "JUPEB", code: "MED_JUP", name: "Department of Medicine/Dentistry/Pharmacy/BMS-Subjects Combination", slug: "medicine-jupeb" },
+  { id: "MGS_JUP", collegeId: "JUPEB", code: "MGS_JUP", name: "Department of Management/Social Sciences-Subjects Combination", slug: "management-jupeb" },
+  { id: "PSC_JUP", collegeId: "JUPEB", code: "PSC_JUP", name: "Department of Physical Sciences-Subjects Combination", slug: "physical-sciences-jupeb" },
+  { id: "SSC_JUP", collegeId: "JUPEB", code: "SSC_JUP", name: "Department of Social Sciences-Subjects Combination", slug: "social-sciences-jupeb" },
+
+  { id: "LAW_DEP", collegeId: "LAW", code: "LAW", name: "Department of LAW", slug: "law" },
+
+  { id: "CHM", collegeId: "NAS", code: "CHM", name: "Department of Chemistry", slug: "chemistry" },
+  { id: "CSC", collegeId: "NAS", code: "CSC", name: "Department of Computer Science", slug: "computer-science" },
+  { id: "CYB", collegeId: "NAS", code: "CYB", name: "Department of Cyber Security", slug: "cyber-security" },
+  { id: "MIC", collegeId: "NAS", code: "MIC", name: "Department of Microbiology", slug: "microbiology" },
+  { id: "PHY", collegeId: "NAS", code: "PHY", name: "Department of Physics", slug: "physics" },
+  { id: "SWE", collegeId: "NAS", code: "SWE", name: "Department of Software Engineering", slug: "software-engineering" },
+
+  { id: "CSP", collegeId: "OAU", code: "CSP", name: "Community Service Programme (CSP)", slug: "community-service-programme" },
+  { id: "EPS", collegeId: "OAU", code: "EPS", name: "Entrepreneurship Studies (EPS)", slug: "entrepreneurship-studies" },
+  { id: "GST", collegeId: "OAU", code: "GST", name: "Department of General Studies (GST)", slug: "general-studies" },
+  { id: "IUTIS", collegeId: "OAU", code: "IUTIS", name: "Department of Igbenedion University Industrial Training Scheme (IUTIS)", slug: "industrial-training-scheme" },
+  { id: "OUC", collegeId: "OAU", code: "OUC", name: "Department of General (OUC)", slug: "general-ouc" },
+
+  { id: "PHM_DEP", collegeId: "PHM", code: "PHM", name: "Department of PHARMACY (PHM)", slug: "pharmacy" },
+];

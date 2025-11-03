@@ -11,15 +11,9 @@ import {
   type InsertFile,
   type Download,
   type InsertDownload,
-  users,
-  colleges,
-  departments,
-  courses,
-  files,
-  downloads,
 } from "@shared/schema";
-import { db } from "./db";
-import { eq, desc, and, sql } from "drizzle-orm";
+import { seedColleges, seedDepartments } from "./seed-data";
+import { randomUUID } from "crypto";
 
 export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
@@ -50,123 +44,169 @@ export interface IStorage {
   getUserDownloads(userId: string): Promise<Download[]>;
 }
 
-export class DatabaseStorage implements IStorage {
+export class MemStorage implements IStorage {
+  private users: Map<string, User>;
+  private colleges: Map<string, College>;
+  private departments: Map<string, Department>;
+  private courses: Map<string, Course>;
+  private files: Map<string, File>;
+  private downloads: Map<string, Download>;
+
+  constructor() {
+    this.users = new Map();
+    this.colleges = new Map();
+    this.departments = new Map();
+    this.courses = new Map();
+    this.files = new Map();
+    this.downloads = new Map();
+
+    seedColleges.forEach((college) => {
+      this.colleges.set(college.id, college as College);
+    });
+
+    seedDepartments.forEach((dept) => {
+      this.departments.set(dept.id, dept as Department);
+    });
+  }
+
   async getUser(id: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.id, id));
-    return user;
+    return this.users.get(id);
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.username, username));
-    return user;
+    return Array.from(this.users.values()).find((user) => user.username === username);
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const [user] = await db.insert(users).values(insertUser).returning();
+    const id = randomUUID();
+    const user: User = { 
+      ...insertUser, 
+      id, 
+      email: insertUser.email ?? null,
+      displayName: insertUser.displayName ?? null,
+      reputation: 0, 
+      createdAt: new Date() 
+    };
+    this.users.set(id, user);
     return user;
   }
 
   async getColleges(): Promise<College[]> {
-    return await db.select().from(colleges);
+    return Array.from(this.colleges.values());
   }
 
   async getCollege(id: string): Promise<College | undefined> {
-    const [college] = await db.select().from(colleges).where(eq(colleges.id, id));
-    return college;
+    return this.colleges.get(id);
   }
 
   async getCollegeBySlug(slug: string): Promise<College | undefined> {
-    const [college] = await db.select().from(colleges).where(eq(colleges.slug, slug));
-    return college;
+    return Array.from(this.colleges.values()).find((c) => c.slug === slug);
   }
 
   async createCollege(insertCollege: InsertCollege): Promise<College> {
-    const [college] = await db.insert(colleges).values(insertCollege).returning();
+    const college = insertCollege as College;
+    this.colleges.set(college.id, college);
     return college;
   }
 
   async getDepartments(collegeId?: string): Promise<Department[]> {
+    const allDepts = Array.from(this.departments.values());
     if (collegeId) {
-      return await db.select().from(departments).where(eq(departments.collegeId, collegeId));
+      return allDepts.filter((d) => d.collegeId === collegeId);
     }
-    return await db.select().from(departments);
+    return allDepts;
   }
 
   async getDepartment(id: string): Promise<Department | undefined> {
-    const [department] = await db.select().from(departments).where(eq(departments.id, id));
-    return department;
+    return this.departments.get(id);
   }
 
   async getDepartmentBySlug(slug: string): Promise<Department | undefined> {
-    const [department] = await db.select().from(departments).where(eq(departments.slug, slug));
-    return department;
+    return Array.from(this.departments.values()).find((d) => d.slug === slug);
   }
 
   async createDepartment(insertDepartment: InsertDepartment): Promise<Department> {
-    const [department] = await db.insert(departments).values(insertDepartment).returning();
+    const department = insertDepartment as Department;
+    this.departments.set(department.id, department);
     return department;
   }
 
   async getCourses(departmentId?: string): Promise<Course[]> {
+    const allCourses = Array.from(this.courses.values());
     if (departmentId) {
-      return await db.select().from(courses).where(eq(courses.departmentId, departmentId));
+      return allCourses.filter((c) => c.departmentId === departmentId);
     }
-    return await db.select().from(courses);
+    return allCourses;
   }
 
   async getCourse(id: string): Promise<Course | undefined> {
-    const [course] = await db.select().from(courses).where(eq(courses.id, id));
-    return course;
+    return this.courses.get(id);
   }
 
   async getCoursesByLevel(departmentId: string, level: number): Promise<Course[]> {
-    return await db
-      .select()
-      .from(courses)
-      .where(and(eq(courses.departmentId, departmentId), eq(courses.level, level)));
+    return Array.from(this.courses.values()).filter(
+      (c) => c.departmentId === departmentId && c.level === level
+    );
   }
 
   async createCourse(insertCourse: InsertCourse): Promise<Course> {
-    const [course] = await db.insert(courses).values(insertCourse).returning();
+    const id = randomUUID();
+    const course: Course = { 
+      ...insertCourse, 
+      id,
+      description: insertCourse.description ?? null,
+      semester: insertCourse.semester ?? null
+    };
+    this.courses.set(id, course);
     return course;
   }
 
   async getFiles(courseId?: string): Promise<File[]> {
+    const allFiles = Array.from(this.files.values());
     if (courseId) {
-      return await db
-        .select()
-        .from(files)
-        .where(eq(files.courseId, courseId))
-        .orderBy(desc(files.uploadedAt));
+      return allFiles.filter((f) => f.courseId === courseId).sort(
+        (a, b) => b.uploadedAt.getTime() - a.uploadedAt.getTime()
+      );
     }
-    return await db.select().from(files).orderBy(desc(files.uploadedAt));
+    return allFiles.sort((a, b) => b.uploadedAt.getTime() - a.uploadedAt.getTime());
   }
 
   async getFile(id: string): Promise<File | undefined> {
-    const [file] = await db.select().from(files).where(eq(files.id, id));
-    return file;
+    return this.files.get(id);
   }
 
   async createFile(insertFile: InsertFile): Promise<File> {
-    const [file] = await db.insert(files).values(insertFile).returning();
+    const id = randomUUID();
+    const file: File = { 
+      ...insertFile, 
+      id,
+      fileSize: insertFile.fileSize ?? null,
+      verified: false, 
+      downloadCount: 0, 
+      uploadedAt: new Date() 
+    };
+    this.files.set(id, file);
     return file;
   }
 
   async incrementDownloadCount(fileId: string): Promise<void> {
-    await db
-      .update(files)
-      .set({ downloadCount: sql`${files.downloadCount} + 1` })
-      .where(eq(files.id, fileId));
+    const file = this.files.get(fileId);
+    if (file) {
+      file.downloadCount++;
+      this.files.set(fileId, file);
+    }
   }
 
   async createDownload(insertDownload: InsertDownload): Promise<Download> {
-    const [download] = await db.insert(downloads).values(insertDownload).returning();
+    const id = randomUUID();
+    const download: Download = { ...insertDownload, id, downloadedAt: new Date() };
+    this.downloads.set(id, download);
     return download;
   }
 
   async getUserDownloads(userId: string): Promise<Download[]> {
-    return await db.select().from(downloads).where(eq(downloads.userId, userId));
+    return Array.from(this.downloads.values()).filter((d) => d.userId === userId);
   }
 }
 
-export const storage = new DatabaseStorage();
+export const storage = new MemStorage();
